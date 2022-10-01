@@ -39,4 +39,6 @@ John Salame
  * Work log and version log:
  *   Fri, 9/30/22 - 2 hr
  *     Reread my notes and make a plan
-*/
+ *   Version 0 Sat, 10/1/22 2:06 PM - 1 hr
+ *     Convert HW3 files to HW4 files
+ */

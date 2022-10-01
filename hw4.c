@@ -1,30 +1,9 @@
 /*
  * John Salame
  * CSCI 5229 Computer Graphics
- * Homework 3 - 3D Scene
- * Due 9/22/22
- * Work log and version log:
- *   Version 1 (untracked) 10/21/22 10:00 PM - 10/22/22 1:30 AM = 3.5 hr
- *     Got the shaft of the candy cane, but missing the last quad; not sure why
- *       Answer: The quad was not missing; the cylinder wall was complete. The missing part was one pie slice of the base circle.
- *     Attempted to do the hook but realized I still don't know exactly how coordinates and transforms work
- *     This is as far as I get without looking at examples
- *   Version 2 (tracked) 10/22/22 3:30 PM - 4:24 PM = 0.9 hr
- *     Remembered to enable Z-Buffer, fixed the weird rendering of the cylinder when I should have seen the base but could not.
- *     Remembered to do the triangle fan at <=360 degrees (I had <360, which looked like Pac-Man instead of a circle).
- *     Figured out which axis I actually need to rotate the hook around (y-axis, not z-axis).
- *     I still need to get the candy cane hook in the correct location. Right now it is on top of the hook's axis of rotation instead of on top of the straight part of the cane. I need to maybe use homogeneous coordinates in order to rotate the (-hookRad, 0, 0) vector around the origin.
- *   Version 3 (tracked) 10/22/22 4:24 PM - 5:00 PM = 0.6 hr
- *     Got the candy cane hook working (but the top of the hook curve is disjoint because the cylinders are too short. I may make the hook mathematically later, with variable section lengths depending on the distance of the point from the center of the hook sweep curve). 
- *     I still do not specify the location and rotation of a candy cane as parameters. If I do this, it should make positioning things in the scene easier.
- *    Version 4 (tracked) 10/22/22 8:30 PM - 11:00 PM = 2.5 hr
- *      I have one smoooooth candy cane!
- *      I made a proof on a whiteboard for how long to make the secant line and in what direction, for perfectly connecting hook segments.
- *      The proof is hookProof.JPG.
- *      I still do not have parameters in the candy cane for physical placement, but I am happy with what I have.
- *      I think my object is sufficiently complicated, if you look at the equation I came up with to generate the hook.
- *    Version 5 (tracked)
- *      Add README.md
+ * Homework 4 - Projections
+ * Due 9/29/22, extended to Sun, 10/2/22
+ * Work log and versioning:
  */
 
 #include <stdio.h>
