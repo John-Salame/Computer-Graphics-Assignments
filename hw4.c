@@ -35,10 +35,20 @@
 int th = 55; // angle around y-axis
 int ph = 20; // angle around x-axis
 int dim = 20; // width and height of the orthographic projection
-
+int mode = 0; // begin in orthogonal projection
+int fpTh = 0; // first-person theta
+int fpPh = 0; // first-person phi
+double forward[3] = {0, 0, -1}; // first-person forward unit vector
+double up[3] = {0, 1, 0}; // first-person up unit vector
+double eye[3] = {0, 6, 0}; // first-person eye position
+double walk = 0.25; // how much to walk with each step
+// Projection-related stuff
+int fov = 55;
+double asp; // aspect ratio, used to keep the proportions of an object constant when resizing the window
 
 
 // BEGIN UTILITY FUNCTIONS
+
 
 /* sin function with degrees as input */
 float Sin(float angle) {
@@ -88,15 +98,6 @@ void ErrCheck(char* where)
 {
    int err = glGetError();
    if (err) fprintf(stderr,"ERROR: %s [%s]\n",gluErrorString(err),where);
-}
-
-/* Show the rotated view; this is called at the start of display */
-void rotateView() {
-  glLoadIdentity();
-  // Rotate on x-axis, then model y-axis
-  glRotatef(ph, 1.0, 0, 0);
-  glRotatef(th, 0, 1.0, 0);
-  ErrCheck("rotate view");
 }
 
 /* Helper function to display the coordinate axes */
@@ -218,18 +219,37 @@ void CandyCane(float crossRad, float straightHeight, float hookRad, int hookDeg)
 
 
 void display() {
+  double lookAtC[3];
+  double Ex;
+  double Ey;
+  double Ez;
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glPushMatrix();
-  //glTranslatef(0, 0, dim); // prevent negative z from existing
-  int mode = 1;
-  if (mode)
-  {
-    double Ex = -2*dim*Sin(th)*Cos(ph);
-    double Ey = +2*dim        *Sin(ph);
-    double Ez = +2*dim*Cos(th)*Cos(ph);
-    gluLookAt(Ex,Ey,Ez , 0,0,0 , 0,Cos(ph),0);
+  switch(mode) {
+    // Orthogonal Overhead
+    case 0:
+      glRotatef(ph, 1, 0, 0);
+      glRotatef(th, 0, 1, 0);
+      ErrCheck("Display Orthogonal");
+      break;
+    // Perspective Overhead
+    case 1:
+      Ex = -2*dim*Sin(th)*Cos(ph);
+      Ey = +2*dim        *Sin(ph);
+      Ez = +2*dim*Cos(th)*Cos(ph);
+      gluLookAt(Ex,Ey,Ez , 0,0,0 , 0,Cos(ph),0);
+      ErrCheck("Display Perspective");
+      break;
+    // Perspective First Person
+    case 2:
+      for(int i=0; i<3; i++)
+        lookAtC[i] = eye[i]+forward[i];
+      gluLookAt(eye[0],eye[1],eye[2], lookAtC[0],lookAtC[1],lookAtC[2], up[0],up[1],up[2]);
+      ErrCheck("Display Fisrt-Person");
+      break;
+    default:
+      Fatal("This mode should not exist: mode %d", mode);
   }
-  //rotateView();
+  glPushMatrix();
   // I haven't figured out polygon offset yet, but it seems like there is no z-fighting with the base plate and the candy cane base until I turn it on.
   //glEnable(GL_POLYGON_OFFSET_FILL);
   //glEnable(GL_POLYGON_OFFSET_LINE);
@@ -254,8 +274,35 @@ void display() {
   //glDisable(GL_POLYGON_OFFSET_POINT);
   glPopMatrix();
   // render the scene
+  ErrCheck("display");
   glFlush();
   glutSwapBuffers();
+}
+
+void Project() {
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  switch(mode) {
+    case 0:
+      glOrtho(-asp*dim,+asp*dim, -dim,+dim, -dim,+dim);
+      ErrCheck("Project Orthogonal");
+      break;
+    case 1:
+      gluPerspective(fov,asp,dim/4,4*dim);
+      ErrCheck("Project Perspective");
+      break;
+    case 2:
+      gluPerspective(fov,asp,dim/4,4*dim);
+      ErrCheck("Project First-Person");
+      break;
+    default:
+      Fatal("This mode should not exist: mode %d", mode);
+    // Switch to manipulating the model matrix
+    glMatrixMode(GL_MODELVIEW);
+    // Undo previous transformations
+    glLoadIdentity();
+    ErrCheck("Project");
+  }
 }
 
 /* React to key presses */
@@ -278,6 +325,8 @@ void special(int key, int x, int y) {
   //  Keep angles to +/-360 degrees
   th %= 360;
   ph %= 360;
+  // re-project
+  Project();
   // re-render the screen
   glutPostRedisplay();
 }
@@ -286,28 +335,26 @@ void key(unsigned char ch,int x,int y) {
   //  Exit on ESC
   if (ch == 27)
     exit(0);
+  // M: cycle to the next view mode (projection type)
+  else if (ch == 'm' || ch == 'M')
+    mode = (mode + 1) % 3;
+  // re-project
+  Project();
+  // re-render the screen
+  glutPostRedisplay();
 }
 
 void reshape(int width, int height) {
-  int fov = 70;
-  //  Set viewport as entire window
+  // Set viewport as entire window
   glViewport(0, 0, RES*width, RES*height);
-  // Select projection matrix
-  glMatrixMode(GL_PROJECTION);
-  // Set projection to identity
-  glLoadIdentity();
-  //  Orthogonal projection:  unit cube adjusted for aspect ratio
-  double asp = (height>0) ? (double)width/height : 1;
-  //glOrtho(-dim*asp,+dim*asp, -dim,+dim, -dim,+dim);
-  gluPerspective(fov,asp,dim/16,16*dim);
- // Select model view of matrix
- glMatrixMode(GL_MODELVIEW);
- // Set the model view to identity
- glLoadIdentity();
+  //  unit cube adjusted for aspect ratio
+  asp = (height>0) ? (double)width/height : 1;
+  // set the projection to orthogonal or perspective, using the aspect ratio
+  Project();
 }
 
 
-int main(int argc, char** argv){
+int main(int argc, char** argv) {
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
   glutCreateWindow("John Salame HW4: Projections");
