@@ -34,13 +34,13 @@
 // Begin global variables
 int th = 55; // angle around y-axis
 int ph = 20; // angle around x-axis
-int dim = 20; // width and height of the orthographic projection
+double dim = 20.0; // width and height of the orthographic projection
 int mode = 0; // begin in orthogonal projection
 int fpTh = 0; // first-person theta
 int fpPh = 0; // first-person phi
 double forward[3] = {0, 0, -1}; // first-person forward unit vector
 double up[3] = {0, 1, 0}; // first-person up unit vector
-double eye[3] = {0, 6, 0}; // first-person eye position
+double eye[3] = {0, 2, 4}; // first-person eye position
 double walk = 0.25; // how much to walk with each step
 // Projection-related stuff
 int fov = 55;
@@ -292,7 +292,7 @@ void Project() {
       ErrCheck("Project Perspective");
       break;
     case 2:
-      gluPerspective(fov,asp,dim/4,4*dim);
+      gluPerspective(fov,asp,dim/32,2*dim); // I change the near and far for first-person so we can get a good look.
       ErrCheck("Project First-Person");
       break;
     default:
@@ -307,8 +307,8 @@ void Project() {
 
 /* React to key presses */
 void special(int key, int x, int y) {
-  int dir = 0; // increase a mode or parameter up or down
-  int dir2 = 0; //same as dir, but for up and down arrow keys; increases param at a higher rate.
+  int dir = 0; // positive for positive theta increase, negative for a theta decrease
+  int dir2 = 0; //same as dir, but for up and down arrow keys
   int thRate = 5; // degrees of rotation per arrow key press
   int phRate = 5;
   if(key == GLUT_KEY_RIGHT)
@@ -319,9 +319,36 @@ void special(int key, int x, int y) {
     dir2 = 1;
   else if(key == GLUT_KEY_DOWN)
     dir2 = -1;
-
-  th += dir * thRate;
-  ph += dir2 * phRate;
+  
+  switch(mode) {
+    // Orthogonal Overhead
+    case 0:
+      // no break; intentional fall through so th and ph correlate for both overhead modes
+    // Perspective Overhead
+    case 1:
+      th += dir * thRate;
+      ph += dir2 * phRate;
+      break;
+    // Perspective First-Person
+    case 2:
+      // first person theta and phi, for turning your head
+      fpTh -= dir * thRate;
+      fpPh += dir2 * phRate;
+      // The following calculations are based on rotating (0, 0, -1) around y-axis and then x-axis.
+      // However, since we want left to turn left (counter-clockwise) and right to turn right (clockwise),
+      // we invert the change in first-person theta so the right key makes a negative change to fpTh,
+      // which makes a positive change in x from the initial forward direction.
+      forward[0] = -Sin(fpTh);
+      forward[1] = Cos(fpTh)*Sin(fpPh);
+      forward[2] = -Cos(fpTh)*Cos(fpPh);
+      // Now, calculate the up vector under the same assumptions
+      up[0] = 0; // this isn't very intuitive. Let's see if it feels natural.
+      up[1] = Cos(fpPh);
+      up[2] = Sin(fpPh);
+      break;
+    default:
+      Fatal("This mode should not exist: mode %d", mode);
+  }
   //  Keep angles to +/-360 degrees
   th %= 360;
   ph %= 360;

@@ -43,6 +43,8 @@ John Salame
  *     Convert HW3 files to HW4 files
  *   Version 1 Sat, 10/1/22 2:06 PM - 6:44 PM = 4.5 hr
  *     Very simple perspective projection using formula from example 9
- *   Version 2 Sun, 10/2/22 1:45 PM - 2:15 PM = 1.5 hr
+ *   Version 2 Sun, 10/2/22 1:45 PM - 3:15 PM = 1.5 hr
  *     Switching between modes
+ *   Version 3 Sun, 10/2/22 3:15 PM - 4:30 PM = 1.25 hr
+ *     Turning the head is weird. Instead of turning the head around the real y-axis, it turned it around the up axis, which felt unnatural as it caused the head to turn in a rising and falling arc.
  */
