@@ -1,14 +1,13 @@
-# Homework 3: 3D Scene
+# Homework 4: Projections
 John Salame
 CSCI 5229
-9/22/22
+Due 10/2/22 (originally 9/29/22)
 
 ## Controls
-All you can do is rotate the view with the arrow keys
+* Press CTRL to change from Orthographic to Perspective to First Person.  
+* First-Person Perspective: Pan the camera or move with WASD (W=forward, A=left, S=down, D=right).  
+* First-Person Perspective: Turn the camera with the arrow keys.
+* Overhead Orthogonal or Overhead Perspective: Spin the scene.
 
 ## Time taken
-My versions and work log are detailed in the comments at the top of hw3.c.  
-I have taken 7.5 hours in total to create my candy canes.  
-In the future, I may make snowflakes. 
-My idea for a final project is to make a metallic park bench under a lamp with some piles of snow around, snowflakes falling, and candy canes planted in the snow, like a sort of winter fantasy.
 

@@ -41,4 +41,6 @@ John Salame
  *     Reread my notes and make a plan
  *   Version 0 Sat, 10/1/22 2:06 PM - 1 hr
  *     Convert HW3 files to HW4 files
+ *   Version 1 Sat, 10/1/22 2:06 PM - 6:44 PM = 4.5 hr
+ *     Very simple perspective projection using formula from example 9
  */

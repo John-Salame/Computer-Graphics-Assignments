@@ -32,9 +32,9 @@
 
 
 // Begin global variables
-double th = 0; // angle around y-axis
-double ph = 0; // angle around x-axis
-int dim = 10; // width and height of the orthographic projection
+int th = 55; // angle around y-axis
+int ph = 20; // angle around x-axis
+int dim = 20; // width and height of the orthographic projection
 
 
 
@@ -42,13 +42,13 @@ int dim = 10; // width and height of the orthographic projection
 
 /* sin function with degrees as input */
 float Sin(float angle) {
-  float newAngle = M_PI * angle / 180.0;
+  float newAngle = 3.14159 * angle / 180.0;
   return sin(newAngle);
 }
 
 /* cos function with degrees as input */
 float Cos(float angle) {
-  float newAngle = M_PI * angle / 180.0;
+  float newAngle = 3.14159 * angle / 180.0;
   return cos(newAngle);
 }
 
@@ -195,6 +195,7 @@ void RedStripedHookSegment(int circlePrecision, float crossRad, float hookRad) {
  */
 void CandyCane(float crossRad, float straightHeight, float hookRad, int hookDeg) {
   glPushMatrix();
+  glRotatef(-90, 1.0, 0, 0); // make it so y is up for the candy cane instead of z. I have this because I initially thought z was pointing up.
   int circlePrecision = 15; // degrees per rectangle making up a cylinder
   // First, make a circle at the base of the candy cane
   Circle(circlePrecision, crossRad, 0, 0, 0);
@@ -218,19 +219,43 @@ void CandyCane(float crossRad, float straightHeight, float hookRad, int hookDeg)
 
 void display() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  // TO-DO: Push the model matrix (not necessary since rotateView resets the transform to the identity matrix)
-  rotateView();
+  glPushMatrix();
+  //glTranslatef(0, 0, dim); // prevent negative z from existing
+  int mode = 1;
+  if (mode)
+  {
+    double Ex = -2*dim*Sin(th)*Cos(ph);
+    double Ey = +2*dim        *Sin(ph);
+    double Ez = +2*dim*Cos(th)*Cos(ph);
+    gluLookAt(Ex,Ey,Ez , 0,0,0 , 0,Cos(ph),0);
+  }
+  //rotateView();
+  // I haven't figured out polygon offset yet, but it seems like there is no z-fighting with the base plate and the candy cane base until I turn it on.
+  //glEnable(GL_POLYGON_OFFSET_FILL);
+  //glEnable(GL_POLYGON_OFFSET_LINE);
+  //glEnable(GL_POLYGON_OFFSET_POINT);
+  // create the base plate
   displayAxes();
-  glRotatef(-90, 1.0, 0, 0); // make it so y is up for the candy cane instead of z
+  //glPolygonOffset(1, 1);
+  glColor3ub(34, 139, 34); // forest green
+  glBegin(GL_QUADS);
+  glVertex3f(0.8*dim, 0, 0.8*dim); //make sure to have CCW winding
+  glVertex3f(0.8*dim, 0, -0.8*dim);
+  glVertex3f(-0.8*dim, 0, -0.8*dim);
+  glVertex3f(-0.8*dim, 0, 0.8*dim);
+  glEnd();
+  //glPolygonOffset(2, 2);
   CandyCane(0.8, 4.0, 1.5, 180);
-  glTranslatef(2.0, -2.0, -1.0);
-  glRotatef(60, 0, 0, 1.0); // rotate about the z-axis (which is the axis of the candy cane at this point since transforms happen from bottom-up)
+  glTranslatef(2.0, -1.0, 2.0); // offset from the previous candy cane
+  glRotatef(60, 0, 1.0, 0); //rotate around the candy cane axis
   CandyCane(1.0, 7.0, 1.3, 160);
-  // TO-DO: Pop the model matrix
+  //glDisable(GL_POLYGON_OFFSET_FILL);
+  //glDisable(GL_POLYGON_OFFSET_LINE);
+  //glDisable(GL_POLYGON_OFFSET_POINT);
+  glPopMatrix();
   // render the scene
   glFlush();
   glutSwapBuffers();
-  ErrCheck("display");
 }
 
 /* React to key presses */
@@ -250,11 +275,21 @@ void special(int key, int x, int y) {
 
   th += dir * thRate;
   ph += dir2 * phRate;
+  //  Keep angles to +/-360 degrees
+  th %= 360;
+  ph %= 360;
   // re-render the screen
   glutPostRedisplay();
 }
 
+void key(unsigned char ch,int x,int y) {
+  //  Exit on ESC
+  if (ch == 27)
+    exit(0);
+}
+
 void reshape(int width, int height) {
+  int fov = 70;
   //  Set viewport as entire window
   glViewport(0, 0, RES*width, RES*height);
   // Select projection matrix
@@ -263,7 +298,8 @@ void reshape(int width, int height) {
   glLoadIdentity();
   //  Orthogonal projection:  unit cube adjusted for aspect ratio
   double asp = (height>0) ? (double)width/height : 1;
-  glOrtho(-dim*asp,+dim*asp, -dim,+dim, -dim,+dim);
+  //glOrtho(-dim*asp,+dim*asp, -dim,+dim, -dim,+dim);
+  gluPerspective(fov,asp,dim/16,16*dim);
  // Select model view of matrix
  glMatrixMode(GL_MODELVIEW);
  // Set the model view to identity
@@ -274,14 +310,20 @@ void reshape(int width, int height) {
 int main(int argc, char** argv){
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-  glutCreateWindow("John Salame Homework 3: 3D Scene");
+  glutCreateWindow("John Salame HW4: Projections");
+#ifdef USEGLEW
+  //  Initialize GLEW
+  if (glewInit()!=GLEW_OK) Fatal("Error initializing GLEW\n");
+#endif
   // Register the callback functions
   glutDisplayFunc(display);
   glutSpecialFunc(special);
+  glutKeyboardFunc(key);
   glutReshapeFunc(reshape);
   // Enable Z-buffer depth test
   glEnable(GL_DEPTH_TEST);
   // Finally, allow the window to draw
+  ErrCheck("init");
   glutMainLoop();
   return 0;
 }
