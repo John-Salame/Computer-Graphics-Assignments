@@ -338,13 +338,13 @@ void special(int key, int x, int y) {
       // However, since we want left to turn left (counter-clockwise) and right to turn right (clockwise),
       // we invert the change in first-person theta so the right key makes a negative change to fpTh,
       // which makes a positive change in x from the initial forward direction.
-      forward[0] = -Sin(fpTh);
-      forward[1] = Cos(fpTh)*Sin(fpPh);
+      forward[0] = -Sin(fpTh)*Cos(fpPh);
+      forward[1] = Sin(fpPh);
       forward[2] = -Cos(fpTh)*Cos(fpPh);
       // Now, calculate the up vector under the same assumptions
-      up[0] = 0; // this isn't very intuitive. Let's see if it feels natural.
+      up[0] = Sin(fpTh)*Sin(fpPh); // this isn't very intuitive. Let's see if it feels natural.
       up[1] = Cos(fpPh);
-      up[2] = Sin(fpPh);
+      up[2] = Cos(fpTh)*Sin(fpPh);
       break;
     default:
       Fatal("This mode should not exist: mode %d", mode);

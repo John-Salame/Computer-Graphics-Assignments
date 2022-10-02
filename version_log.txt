@@ -47,4 +47,6 @@ John Salame
  *     Switching between modes
  *   Version 3 Sun, 10/2/22 3:15 PM - 4:30 PM = 1.25 hr
  *     Turning the head is weird. Instead of turning the head around the real y-axis, it turned it around the up axis, which felt unnatural as it caused the head to turn in a rising and falling arc.
+ *   Version 4 Sun, 10/2/22 4:30 PM = 5:00 PM = 0.5 hr
+ *     Got head turning correct
  */
