@@ -49,4 +49,6 @@ John Salame
  *     Turning the head is weird. Instead of turning the head around the real y-axis, it turned it around the up axis, which felt unnatural as it caused the head to turn in a rising and falling arc.
  *   Version 4 Sun, 10/2/22 4:30 PM = 5:00 PM = 0.5 hr
  *     Got head turning correct
+ *   Version 5 Sun, 10/2/22 5:00 PM - 6:00 PM = 1 hr
+ *     First-person completed. Got walking working.
  */

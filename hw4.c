@@ -358,13 +358,44 @@ void special(int key, int x, int y) {
   glutPostRedisplay();
 }
 
+/* Keyboard keys, mainly for switching view mode and for walking */
 void key(unsigned char ch,int x,int y) {
+  int dir1 = 0; // left-right (right is positive)
+  int dir2 = 0; // forward-back (forward is positive)
+  double invMag = 0; // the inverse magnitude of a vector; multiply by this in order to normalize
+  double fwX = 0; // x portion of forward vector projected onto ground and normalized
+  double fwZ = 0; // z portion of forward vector projected onto ground and normalized
   //  Exit on ESC
   if (ch == 27)
     exit(0);
   // M: cycle to the next view mode (projection type)
   else if (ch == 'm' || ch == 'M')
     mode = (mode + 1) % 3;
+  // Only allow planar movement in mode 2 (first-person)
+  switch(mode) {
+    // I wonder if this is a security vulnerability. Would people be able to arbitrarily put any mode number and jump to some random instruction and crash the program?
+    case 2:
+      if (ch == 'w' || ch == 'W')
+        dir2 = 1;
+      else if (ch == 'a' || ch == 'A')
+        dir1 = -1;
+      else if (ch == 's' || ch == 'S')
+        dir2 = -1;
+      else if (ch == 'd' || ch == 'D')
+        dir1 = 1;
+      // Now, move your character
+      //   Calculate the magnitude of forward parallel to the ground plane (x and z components)
+      //   Please note that the right vector has this same magnitude and is perpendicular
+      invMag = sqrt(1/(forward[0]*forward[0] + forward[2]*forward[2]));
+      // Now normalize the components of the forward vector parallel to the ground and then scale by our walk step
+      fwX = forward[0]*invMag*walk;
+      fwZ = forward[2]*invMag*walk;
+      // Now, change the x and z of the eye based on forward, right, and the direction we're going.
+      //   Fwd = [fwX, 0, fwZ], Rt = [-fwZ, 0 fwX]
+      eye[0] += dir2*fwX - dir1*fwZ;
+      eye[2] += dir2*fwZ + dir1*fwX;
+      break;
+  }
   // re-project
   Project();
   // re-render the screen
