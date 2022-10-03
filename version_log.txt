@@ -51,4 +51,7 @@ John Salame
  *     Got head turning correct
  *   Version 5 Sun, 10/2/22 5:00 PM - 6:00 PM = 1 hr
  *     First-person completed. Got walking working.
+ *   Version 6 Sun, 10/2/22 6:00 PM - 7:15 PM = 1.25 hr
+ *     Got reshape working (previously had a bug with my transforms happening twice each time I resized the window)
+ *     Nicer starting point for first-person mode
  */

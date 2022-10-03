@@ -36,11 +36,11 @@ int th = 55; // angle around y-axis
 int ph = 20; // angle around x-axis
 double dim = 20.0; // width and height of the orthographic projection
 int mode = 0; // begin in orthogonal projection
-int fpTh = 0; // first-person theta
-int fpPh = 0; // first-person phi
+int fpTh = -220; // first-person theta
+int fpPh = 10; // first-person phi
 double forward[3] = {0, 0, -1}; // first-person forward unit vector
 double up[3] = {0, 1, 0}; // first-person up unit vector
-double eye[3] = {0, 2, 4}; // first-person eye position
+double eye[3] = {8.140, 2.0, -4.592}; // first-person eye position
 double walk = 0.25; // how much to walk with each step
 // Projection-related stuff
 int fov = 55;
@@ -100,6 +100,48 @@ void ErrCheck(char* where)
    if (err) fprintf(stderr,"ERROR: %s [%s]\n",gluErrorString(err),where);
 }
 
+/* Update the forward and up vectors for first-person mode */
+void updateFpVecs() {
+  // The following calculations are based on rotating (0, 0, -1) around y-axis and then x-axis.
+  // However, since we want left to turn left (counter-clockwise) and right to turn right (clockwise),
+  // we invert the change in first-person theta so the right key makes a negative change to fpTh,
+  // which makes a positive change in x from the initial forward direction.
+  forward[0] = -Sin(fpTh)*Cos(fpPh);
+  forward[1] = Sin(fpPh);
+  forward[2] = -Cos(fpTh)*Cos(fpPh);
+  // Now, calculate the up vector under the same assumptions
+  up[0] = Sin(fpTh)*Sin(fpPh); // this isn't very intuitive. Let's see if it feels natural.
+  up[1] = Cos(fpPh);
+  up[2] = Cos(fpTh)*Sin(fpPh);
+}
+
+/* Change the projection settings */
+void Project() {
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  switch(mode) {
+    case 0:
+      glOrtho(-asp*dim,+asp*dim, -dim,+dim, -dim,+dim);
+      ErrCheck("Project Orthogonal");
+      break;
+    case 1:
+      gluPerspective(fov,asp,dim/4,4*dim);
+      ErrCheck("Project Perspective");
+      break;
+    case 2:
+      gluPerspective(fov,asp,dim/32,2*dim); // I change the near and far for first-person so we can get a good look.
+      ErrCheck("Project First-Person");
+      break;
+    default:
+      Fatal("This mode should not exist: mode %d", mode);
+    // Switch to manipulating the model matrix
+    glMatrixMode(GL_MODELVIEW);
+    // Undo previous transformations
+    glLoadIdentity();
+    ErrCheck("Project");
+  }
+}
+
 /* Helper function to display the coordinate axes */
 void displayAxes() {
   /* To-Do: Improve by pushing and popping the current transform matrix */
@@ -129,7 +171,9 @@ void displayAxes() {
 }
 
 
+
 // BEGIN OBJECT DEFINITIONS
+
 
 /* Draw a circle with intervals of circlePrecision degrees and radius r at origin (ox, oy, oz) */
 void Circle(float circlePrecision, float r, float ox, float oy, float oz) {
@@ -224,6 +268,7 @@ void display() {
   double Ey;
   double Ez;
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glPushMatrix();
   switch(mode) {
     // Orthogonal Overhead
     case 0:
@@ -249,7 +294,6 @@ void display() {
     default:
       Fatal("This mode should not exist: mode %d", mode);
   }
-  glPushMatrix();
   // I haven't figured out polygon offset yet, but it seems like there is no z-fighting with the base plate and the candy cane base until I turn it on.
   //glEnable(GL_POLYGON_OFFSET_FILL);
   //glEnable(GL_POLYGON_OFFSET_LINE);
@@ -277,32 +321,6 @@ void display() {
   ErrCheck("display");
   glFlush();
   glutSwapBuffers();
-}
-
-void Project() {
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  switch(mode) {
-    case 0:
-      glOrtho(-asp*dim,+asp*dim, -dim,+dim, -dim,+dim);
-      ErrCheck("Project Orthogonal");
-      break;
-    case 1:
-      gluPerspective(fov,asp,dim/4,4*dim);
-      ErrCheck("Project Perspective");
-      break;
-    case 2:
-      gluPerspective(fov,asp,dim/32,2*dim); // I change the near and far for first-person so we can get a good look.
-      ErrCheck("Project First-Person");
-      break;
-    default:
-      Fatal("This mode should not exist: mode %d", mode);
-    // Switch to manipulating the model matrix
-    glMatrixMode(GL_MODELVIEW);
-    // Undo previous transformations
-    glLoadIdentity();
-    ErrCheck("Project");
-  }
 }
 
 /* React to key presses */
@@ -334,17 +352,9 @@ void special(int key, int x, int y) {
       // first person theta and phi, for turning your head
       fpTh -= dir * thRate;
       fpPh += dir2 * phRate;
-      // The following calculations are based on rotating (0, 0, -1) around y-axis and then x-axis.
-      // However, since we want left to turn left (counter-clockwise) and right to turn right (clockwise),
-      // we invert the change in first-person theta so the right key makes a negative change to fpTh,
-      // which makes a positive change in x from the initial forward direction.
-      forward[0] = -Sin(fpTh)*Cos(fpPh);
-      forward[1] = Sin(fpPh);
-      forward[2] = -Cos(fpTh)*Cos(fpPh);
-      // Now, calculate the up vector under the same assumptions
-      up[0] = Sin(fpTh)*Sin(fpPh); // this isn't very intuitive. Let's see if it feels natural.
-      up[1] = Cos(fpPh);
-      up[2] = Cos(fpTh)*Sin(fpPh);
+      fpTh %= 360;
+      fpPh %= 360;
+      updateFpVecs(); // update forward and up
       break;
     default:
       Fatal("This mode should not exist: mode %d", mode);
@@ -384,7 +394,9 @@ void key(unsigned char ch,int x,int y) {
       else if (ch == 'd' || ch == 'D')
         dir1 = 1;
       // Now, move your character
-      //   Calculate the magnitude of forward parallel to the ground plane (x and z components)
+      //   First, update your forward and up vector in case your first-person viewing angles changed
+      updateFpVecs();
+      //   Now, calculate the magnitude of forward parallel to the ground plane (x and z components)
       //   Please note that the right vector has this same magnitude and is perpendicular
       invMag = sqrt(1/(forward[0]*forward[0] + forward[2]*forward[2]));
       // Now normalize the components of the forward vector parallel to the ground and then scale by our walk step
@@ -394,6 +406,8 @@ void key(unsigned char ch,int x,int y) {
       //   Fwd = [fwX, 0, fwZ], Rt = [-fwZ, 0 fwX]
       eye[0] += dir2*fwX - dir1*fwZ;
       eye[2] += dir2*fwZ + dir1*fwX;
+      // enable the below line for debugging. I will comment it out or add it back instead of adding a debug mode to the Makefile.
+      //printf("eye [%f, %f, %f] fwd [%f, %f, %f], th %d ph %d\n", eye[0], eye[1], eye[2], forward[0], forward[1], forward[2], fpTh, fpPh);
       break;
   }
   // re-project
