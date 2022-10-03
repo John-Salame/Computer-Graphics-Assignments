@@ -57,4 +57,6 @@ John Salame
  *   Version 7 Sun, 10/2/22 7:15 PM - 8:15 PM = 1 hr
  *     Implemented a scene reset button (button 0)
  *     Started implementing snow mound
+ *   Version 8 Sun, 10/2/22 8:15 PM - 9:45 PM = 1.5 hr
+ *     I finalized my scene and took a nice screenshot!
  */

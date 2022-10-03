@@ -61,11 +61,11 @@ void init() {
   // Start with an angle away from the standard forward.
   // With this style, I can have a nice starting view also with easy calculations 
   // because I only have one dimension on forward to worry about.
-  fpTh = -220;
-  fpPh = 10;
+  fpTh = -290;
+  fpPh = 5;
   forward[0]=0; forward[1]=0; forward[2]=-1;
   up[0]=0; up[1]=1; up[2]=0;
-  eye[0]=8.140; eye[1]=2.0; eye[2]=-4.592;
+  eye[0]=12.046; eye[1]=2.0; eye[2]=4.404;
   walk = 0.25;
   fov = 55;
   updateFpVecs(); // recalculate forward and up using fpTh and fpPh
@@ -280,7 +280,7 @@ void CandyCane(float crossRad, float straightHeight, float hookRad, int hookDeg)
 
 /*
  * The positive part of a 3D Cosine wave centered at (0, 0)
- * Equation: y = Cos(180*x+180*z), domain x e [-0.5, 0.5], z e [-0.5, 0.5]
+ * Equation: y = 0.5*Cos(180*x)+0.5*Cos(180*z)-0.5, domain x e [-0.5, 0.5], z e [-0.5, 0.5]
  * Good for making mounds of snow
  */
 void threeDCos() {
@@ -289,12 +289,18 @@ void threeDCos() {
   const int interval = 15; // angular interval
   const double cartInterval = (double) interval / 180; // cartesian interval (space between points)
   double xLoc = min;
-  glBegin(GL_LINE_STRIP);
-  for(int a = -90; a <= 90; a += interval) {
-    glVertex2f(xLoc, Cos(a));
-    xLoc += cartInterval;
+  double zLoc = min;
+  for(int b = -90; b < 90; b+= interval) {
+    xLoc = min;
+    glBegin(GL_QUAD_STRIP);
+    for(int a = -90; a <= 90; a += interval) {
+      glVertex3f(xLoc, 0.5*Cos(b)+0.5*Cos(a)-0.5, zLoc);
+      glVertex3f(xLoc, 0.5*Cos(b+interval)+0.5*Cos(a)-0.5, zLoc+cartInterval); // the next row of z
+      xLoc += cartInterval;
+    }
+    glEnd();
+    zLoc += cartInterval;
   }
-  glEnd();
 }
 
 
@@ -356,8 +362,36 @@ void display() {
   glPushMatrix();
   // create a snow mound at (5, 0, -8)
   glTranslatef(5, 0, -8);
-  glScalef(3.0, 2.0, 3.0);
+  glPushMatrix(); // so I can make a small candy cane at this position soon
+  glScalef(6.0, 2.0, 5.0);
   threeDCos();
+  glPopMatrix();
+  glPushMatrix();
+  // make a small tilted candy cane in the snow pile
+  glTranslatef(0.1, 0.5, 0);
+  glRotatef(-30, 0, 0, 1);
+  glRotatef(-30, 1, 0, 0);
+  CandyCane(0.2, 1.2, 0.3, 160);
+  glPopMatrix(); // return to the state of the first snow pile
+  // make one more snow pile, but smaller and taller
+  glTranslatef(-3, 0, -2);
+  glScalef(4.5, 3.5, 5.0);
+  threeDCos();
+  // return to the origin of the scene and save it again
+  glPopMatrix();
+  glPushMatrix();
+  // make a large, shallow snow pile between the large candy canes and the overhead view
+  glTranslatef(-6, 0, 8);
+  glPushMatrix();
+  glScalef(10, 2.5, 10);
+  threeDCos();
+  glPopMatrix();
+  // make a candy cane in the large snow pile
+  glTranslatef(1, 0, 0);
+  glRotatef(-15, 0, 0, 1);
+  glRotatef(-120, 0, 1, 0);
+  CandyCane(0.4, 2, 0.6, 210);
+  // Cleanup: reset the matrix in the state machine
   glPopMatrix();
   glPopMatrix();
   // render the scene
