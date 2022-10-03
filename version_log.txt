@@ -54,4 +54,7 @@ John Salame
  *   Version 6 Sun, 10/2/22 6:00 PM - 7:15 PM = 1.25 hr
  *     Got reshape working (previously had a bug with my transforms happening twice each time I resized the window)
  *     Nicer starting point for first-person mode
+ *   Version 7 Sun, 10/2/22 7:15 PM - 8:15 PM = 1 hr
+ *     Implemented a scene reset button (button 0)
+ *     Started implementing snow mound
  */

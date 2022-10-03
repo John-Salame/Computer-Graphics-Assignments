@@ -30,25 +30,46 @@
 #define RES 1
 #endif
 
+// Forward declarations
+void updateFpVecs();
 
 // Begin global variables
-int th = 55; // angle around y-axis
-int ph = 20; // angle around x-axis
-double dim = 20.0; // width and height of the orthographic projection
-int mode = 0; // begin in orthogonal projection
-int fpTh = -220; // first-person theta
-int fpPh = 10; // first-person phi
-double forward[3] = {0, 0, -1}; // first-person forward unit vector
-double up[3] = {0, 1, 0}; // first-person up unit vector
-double eye[3] = {8.140, 2.0, -4.592}; // first-person eye position
-double walk = 0.25; // how much to walk with each step
+// Normally, it's good to initialize everything. However, I will initialize things in init() so I can make a reset functionality.
+int th; // angle around y-axis
+int ph; // angle around x-axis
+double dim; // width and height of the orthographic projection
+int mode; // begin in orthogonal projection
+int fpTh; // first-person theta
+int fpPh; // first-person phi
+double forward[3]; // first-person forward unit vector
+double up[3]; // first-person up unit vector
+double eye[3]; // first-person eye position
+double walk; // how much to walk with each step
 // Projection-related stuff
-int fov = 55;
+int fov;
 double asp; // aspect ratio, used to keep the proportions of an object constant when resizing the window
 
 
 // BEGIN UTILITY FUNCTIONS
 
+
+void init() {
+  th = 55;
+  ph = 20;
+  dim = 20.0;
+  mode = 0;
+  // Start with an angle away from the standard forward.
+  // With this style, I can have a nice starting view also with easy calculations 
+  // because I only have one dimension on forward to worry about.
+  fpTh = -220;
+  fpPh = 10;
+  forward[0]=0; forward[1]=0; forward[2]=-1;
+  up[0]=0; up[1]=1; up[2]=0;
+  eye[0]=8.140; eye[1]=2.0; eye[2]=-4.592;
+  walk = 0.25;
+  fov = 55;
+  updateFpVecs(); // recalculate forward and up using fpTh and fpPh
+}
 
 /* sin function with degrees as input */
 float Sin(float angle) {
@@ -257,6 +278,25 @@ void CandyCane(float crossRad, float straightHeight, float hookRad, int hookDeg)
   ErrCheck("candy cane");
 }
 
+/*
+ * The positive part of a 3D Cosine wave centered at (0, 0)
+ * Equation: y = Cos(180*x+180*z), domain x e [-0.5, 0.5], z e [-0.5, 0.5]
+ * Good for making mounds of snow
+ */
+void threeDCos() {
+  const double min = -0.5;
+  // we do not need a variable for it, but the max is 0.5
+  const int interval = 15; // angular interval
+  const double cartInterval = (double) interval / 180; // cartesian interval (space between points)
+  double xLoc = min;
+  glBegin(GL_LINE_STRIP);
+  for(int a = -90; a <= 90; a += interval) {
+    glVertex2f(xLoc, Cos(a));
+    xLoc += cartInterval;
+  }
+  glEnd();
+}
+
 
 
 // BEGIN CALLBACK FUNCTIONS
@@ -268,6 +308,7 @@ void display() {
   double Ey;
   double Ez;
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  // prevent a bug from double rendering the scene after a reshape
   glPushMatrix();
   switch(mode) {
     // Orthogonal Overhead
@@ -294,13 +335,10 @@ void display() {
     default:
       Fatal("This mode should not exist: mode %d", mode);
   }
-  // I haven't figured out polygon offset yet, but it seems like there is no z-fighting with the base plate and the candy cane base until I turn it on.
-  //glEnable(GL_POLYGON_OFFSET_FILL);
-  //glEnable(GL_POLYGON_OFFSET_LINE);
-  //glEnable(GL_POLYGON_OFFSET_POINT);
-  // create the base plate
+  // store our view of the projection by pushing the matrix
+  glPushMatrix();
   displayAxes();
-  //glPolygonOffset(1, 1);
+  // create the base plate
   glColor3ub(34, 139, 34); // forest green
   glBegin(GL_QUADS);
   glVertex3f(0.8*dim, 0, 0.8*dim); //make sure to have CCW winding
@@ -308,14 +346,19 @@ void display() {
   glVertex3f(-0.8*dim, 0, -0.8*dim);
   glVertex3f(-0.8*dim, 0, 0.8*dim);
   glEnd();
-  //glPolygonOffset(2, 2);
+  // place some candy canes
   CandyCane(0.8, 4.0, 1.5, 180);
   glTranslatef(2.0, -1.0, 2.0); // offset from the previous candy cane
   glRotatef(60, 0, 1.0, 0); //rotate around the candy cane axis
   CandyCane(1.0, 7.0, 1.3, 160);
-  //glDisable(GL_POLYGON_OFFSET_FILL);
-  //glDisable(GL_POLYGON_OFFSET_LINE);
-  //glDisable(GL_POLYGON_OFFSET_POINT);
+  // put me back at the origin of the projection by popping and pushing
+  glPopMatrix();
+  glPushMatrix();
+  // create a snow mound at (5, 0, -8)
+  glTranslatef(5, 0, -8);
+  glScalef(3.0, 2.0, 3.0);
+  threeDCos();
+  glPopMatrix();
   glPopMatrix();
   // render the scene
   ErrCheck("display");
@@ -378,6 +421,9 @@ void key(unsigned char ch,int x,int y) {
   //  Exit on ESC
   if (ch == 27)
     exit(0);
+  // reset the scene
+  else if (ch == '0')
+    init();
   // M: cycle to the next view mode (projection type)
   else if (ch == 'm' || ch == 'M')
     mode = (mode + 1) % 3;
@@ -427,6 +473,7 @@ void reshape(int width, int height) {
 
 
 int main(int argc, char** argv) {
+  init();
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
   glutCreateWindow("John Salame HW4: Projections");
