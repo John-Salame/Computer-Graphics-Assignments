@@ -39,4 +39,24 @@ John Salame
  * Work log and version log:
  *   Fri, 9/30/22 - 2 hr
  *     Reread my notes and make a plan
-*/
+ *   Version 0 Sat, 10/1/22 2:06 PM - 1 hr
+ *     Convert HW3 files to HW4 files
+ *   Version 1 Sat, 10/1/22 2:06 PM - 6:44 PM = 4.5 hr
+ *     Very simple perspective projection using formula from example 9
+ *   Version 2 Sun, 10/2/22 1:45 PM - 3:15 PM = 1.5 hr
+ *     Switching between modes
+ *   Version 3 Sun, 10/2/22 3:15 PM - 4:30 PM = 1.25 hr
+ *     Turning the head is weird. Instead of turning the head around the real y-axis, it turned it around the up axis, which felt unnatural as it caused the head to turn in a rising and falling arc.
+ *   Version 4 Sun, 10/2/22 4:30 PM = 5:00 PM = 0.5 hr
+ *     Got head turning correct
+ *   Version 5 Sun, 10/2/22 5:00 PM - 6:00 PM = 1 hr
+ *     First-person completed. Got walking working.
+ *   Version 6 Sun, 10/2/22 6:00 PM - 7:15 PM = 1.25 hr
+ *     Got reshape working (previously had a bug with my transforms happening twice each time I resized the window)
+ *     Nicer starting point for first-person mode
+ *   Version 7 Sun, 10/2/22 7:15 PM - 8:15 PM = 1 hr
+ *     Implemented a scene reset button (button 0)
+ *     Started implementing snow mound
+ *   Version 8 Sun, 10/2/22 8:15 PM - 9:45 PM = 1.5 hr
+ *     I finalized my scene and took a nice screenshot!
+ */
