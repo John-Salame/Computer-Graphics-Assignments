@@ -32,7 +32,7 @@
  */
 
 /*
-John Salame
+ * John Salame
  * CSCI 5229 Computer Graphics
  * Homework 4 - Projections
  * Due 10/2/22 (originally due 9/29/22)
@@ -59,4 +59,14 @@ John Salame
  *     Started implementing snow mound
  *   Version 8 Sun, 10/2/22 8:15 PM - 9:45 PM = 1.5 hr
  *     I finalized my scene and took a nice screenshot!
+ */
+
+/*
+ * John Salame
+ * CSCI 5229 Computer Graphics
+ * Homework 5 - Lighting
+ * Due 10/6/22
+ * Revisions and work log:
+ *   Version 0 Tues, 10/4/22
+ *     Change mentions of HW4 to HW5
  */

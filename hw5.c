@@ -1,9 +1,8 @@
 /*
  * John Salame
  * CSCI 5229 Computer Graphics
- * Homework 4 - Projections
- * Due 9/29/22, extended to Sun, 10/2/22
- * Work log and versioning:
+ * Homework 5 - Lighting
+ * Due 10/6/22
  */
 
 #include <stdio.h>
