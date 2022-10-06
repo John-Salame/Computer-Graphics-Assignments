@@ -50,7 +50,7 @@ double asp; // aspect ratio, used to keep the proportions of an object constant 
 
 // lighting related globals
 int ambient = 10;
-int diffuse = 50;
+int diffuse = 20; // low diffuse for night-time lighting
 
 // BEGIN UTILITY FUNCTIONS
 
@@ -204,7 +204,7 @@ void Circle(float circlePrecision, float r, float ox, float oy, float oz) {
   glColor4fv(white);
   glMaterialfv(GL_FRONT, GL_AMBIENT, white);
   glMaterialfv(GL_FRONT, GL_DIFFUSE, white);
-  glNormal3f(0, 0, 1);
+  glNormal3f(0, 0, 1); // normal is just the front plane's normal, which is z for this circle
   glBegin(GL_TRIANGLE_FAN);
   glVertex3f(ox, oy, oz); // center of triangle fan
   for(int i=0; i<=360; i+=circlePrecision) {
@@ -230,7 +230,7 @@ void RedStripedCylinderWall(int circlePrecision, float crossRad, float straightH
       nonRed = !nonRed; // binary flip from 0 to 1 or 1 to 0
       glMaterialfv(GL_FRONT, GL_AMBIENT, myColor);
       glMaterialfv(GL_FRONT, GL_DIFFUSE, myColor);
-      glNormal3f(Cos(i), Sin(i), 0);
+      glNormal3f(Cos(i), Sin(i), 0); // here, the normal vector is along the radius
       glVertex3f(crossRad*Cos(i), crossRad*Sin(i), j);
       glVertex3f(crossRad*Cos(i), crossRad*Sin(i), j+quadHeight);
     }
@@ -260,7 +260,7 @@ void RedStripedHookSegment(int circlePrecision, float crossRad, float hookRad) {
     // the normal vector is orthogonal to the tangent line, so it's simple (unlike the plane which follows a secant line).
     glMaterialfv(GL_FRONT, GL_AMBIENT, myColor);
     glMaterialfv(GL_FRONT, GL_DIFFUSE, myColor);
-    glNormal3f(Cos(i), Sin(i), 0);
+    glNormal3f(Cos(i), Sin(i), 0); // here, the normal vector is along the radius
     // start creating the shape
     float x = crossRad*Cos(i);
     float radius = hookRad-x;
@@ -318,7 +318,7 @@ void threeDCos() {
   double xLoc = min;
   double zLoc = min;
   // apply lighting
-  float white[] = {0.5, 0.5, 0.5, 1.0};
+  float white[] = {1.0, 1.0, 1.0, 1.0}; // Note: The lighting will be such that the snow appears gray at night (lighting enabled = night)
   float blue[] =  {0.1, 0.2, 0.5, 0};
   glColor4fv(white); // without the color, the snow mound is white. It seems like the materials don't do anything at all to the color.
   glMaterialfv(GL_FRONT, GL_AMBIENT, blue); // these are doing absolutely nothing right now
@@ -386,19 +386,24 @@ void display() {
 
   // now, start color settings and draw the things which have color
   float Ambient[]   = {0.01*ambient ,0.01*ambient ,0.01*ambient ,1.0};
-  float Diffuse[]   = {0.01*diffuse ,0.01*diffuse ,0.01*diffuse ,1.0};
-  float Position[]  = {-2.0, 3.0, 0.0, 1.0};
+  //float Diffuse[]   = {0.01*diffuse ,0.01*diffuse ,0.00*diffuse ,1.0}; // yellow light, like a lamp
+  float Diffuse[]   = {0.01*diffuse ,0.01*diffuse ,0.05*diffuse ,1.0}; // yellow light with a tinge of blue (moonlight?); allows the snow's blue properties to show
+  //float Position[]  = {-2.0, 3.0, 0.0, 1.0};
+  float Position[] = {dim*Cos(th), dim*Sin(ph), dim*-Sin(th)*Cos(ph), 1.0}; // follow the camera roughly
+  // Draw a circle where the light will be. Draw it before lighting is enabled.
+  Circle(15, 1, Position[0], Position[1], Position[2]);
   glEnable(GL_NORMALIZE);
   glEnable(GL_LIGHTING);
-  glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);
+  // location of viewer for specular light calculations. I'm not sure what the difference is, even from testing example 13.
+  glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 0);
   glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-  glEnable(GL_COLOR_MATERIAL);
+  glEnable(GL_COLOR_MATERIAL); // without this enabled, the glColor4fv does not apply, but the materials do
+  // use light 0
   glEnable(GL_LIGHT0);
   // set the intenisty and color of each type of lighting for light 0, plus set the position
   glLightfv(GL_LIGHT0, GL_AMBIENT, Ambient);
   glLightfv(GL_LIGHT0, GL_DIFFUSE, Diffuse);
   glLightfv(GL_LIGHT0, GL_POSITION, Position);
-  Circle(15, 1, Position[0], Position[1], Position[2]);
   // choose flat or smooth lighting
   glShadeModel(GL_SMOOTH);
 
@@ -410,7 +415,7 @@ void display() {
   glColor4fv(forestGreen);
   glMaterialfv(GL_FRONT, GL_AMBIENT, forestGreen);
   glMaterialfv(GL_FRONT, GL_DIFFUSE, forestGreen);
-  glNormal3f(0, 1, 0);
+  glNormal3f(0, 1, 0); // the normal vector of the ground is up
   glBegin(GL_QUADS);
   glVertex3f(0.8*dim, 0, 0.8*dim); //make sure to have CCW winding
   glVertex3f(0.8*dim, 0, -0.8*dim);
@@ -575,7 +580,7 @@ int main(int argc, char** argv) {
   init();
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-  glutCreateWindow("John Salame HW4: Projections");
+  glutCreateWindow("John Salame HW5: Lighting");
 #ifdef USEGLEW
   //  Initialize GLEW
   if (glewInit()!=GLEW_OK) Fatal("Error initializing GLEW\n");

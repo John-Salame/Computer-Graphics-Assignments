@@ -71,4 +71,6 @@
  *     Change mentions of HW4 to HW5
  *   Version 1 Wed, 10/5/22 3 hr
  *     Calculated all my normals, but the lighting does not work (it is always showing on the same side of the prefab, as if the light is always the same position relative to every object as I create it (instead of sitting in a global position).
+ *   Version 2 Thurs, 10/6/22 (11:00 AM - 1:30 PM = 2.5 hr)
+ *     I moved the light around and found that the snow piles are ok and the candy canes are the problem. It seems like I am lighting the opposite side.
  */
