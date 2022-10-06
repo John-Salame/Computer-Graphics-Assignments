@@ -46,8 +46,11 @@ double eye[3]; // first-person eye position
 double walk; // how much to walk with each step
 // Projection-related stuff
 int fov;
-double asp; // aspect ratio, used to keep the proportions of an object constant when resizing the window
+double asp; // aspect ratio, used to keep the proportions of an object constant when resizing the windowa
 
+// lighting related globals
+int ambient = 10;
+int diffuse = 50;
 
 // BEGIN UTILITY FUNCTIONS
 
@@ -197,6 +200,11 @@ void displayAxes() {
 
 /* Draw a circle with intervals of circlePrecision degrees and radius r at origin (ox, oy, oz) */
 void Circle(float circlePrecision, float r, float ox, float oy, float oz) {
+  float white[] = {1, 1, 1, 1};
+  glColor4fv(white);
+  glMaterialfv(GL_FRONT, GL_AMBIENT, white);
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, white);
+  glNormal3f(0, 0, 1);
   glBegin(GL_TRIANGLE_FAN);
   glVertex3f(ox, oy, oz); // center of triangle fan
   for(int i=0; i<=360; i+=circlePrecision) {
@@ -208,15 +216,26 @@ void Circle(float circlePrecision, float r, float ox, float oy, float oz) {
 
 /* Helper function for candy cane, makes a cylinder wall with radius crossRad and height straightHeight */
 void RedStripedCylinderWall(int circlePrecision, float crossRad, float straightHeight) {
+  float quadHeight = straightHeight / 5.0; // split the cylinder length-wise into multiple quads so lighting works close-up
   float nonRed = 1.0; // 1.0 when white stripe, 0.0 when red stripe
-  glBegin(GL_QUAD_STRIP);
-  for(int i=0; i<=360; i+=circlePrecision) {
-    glColor3f(1.0, nonRed, nonRed); // I need an even number of rectangles for the color to start and end on red
-    nonRed = !nonRed; // binary flip from 0 to 1 or 1 to 0
-    glVertex3f(crossRad*Cos(i), crossRad*Sin(i), 0);
-    glVertex3f(crossRad*Cos(i), crossRad*Sin(i), straightHeight);
+  float myColor[4];
+  myColor[0] = 1.0;
+  myColor[3] = 1.0;
+  for(float j=0; j<straightHeight; j+=quadHeight) {
+    nonRed = 1.0; // prevent a bug that misaligned the stripes on the next layer of quads
+    glBegin(GL_QUAD_STRIP);
+    for(int i=0; i<=360; i+=circlePrecision) {
+      myColor[1] = nonRed; myColor[2] = nonRed;
+      glColor4fv(myColor); // I need an even number of rectangles for the color to start and end on red
+      nonRed = !nonRed; // binary flip from 0 to 1 or 1 to 0
+      glMaterialfv(GL_FRONT, GL_AMBIENT, myColor);
+      glMaterialfv(GL_FRONT, GL_DIFFUSE, myColor);
+      glNormal3f(Cos(i), Sin(i), 0);
+      glVertex3f(crossRad*Cos(i), crossRad*Sin(i), j);
+      glVertex3f(crossRad*Cos(i), crossRad*Sin(i), j+quadHeight);
+    }
+    glEnd();
   }
-  glEnd();
 }
 
 /* 
@@ -227,13 +246,22 @@ void RedStripedCylinderWall(int circlePrecision, float crossRad, float straightH
  */
 void RedStripedHookSegment(int circlePrecision, float crossRad, float hookRad) {
   float nonRed = 1.0;
+  float myColor[4];
+  myColor[0] = 1.0;
+  myColor[3] = 1.0;
   int hookDeg = circlePrecision;
   float secantAngle = (float) hookDeg/2; // x in the image hookProof.JPG
   glBegin(GL_QUAD_STRIP);
   // Draw the quads, which have variable height based on how far out they are
   for(int i=0; i <=360; i+=hookDeg) {
-    glColor3f(1.0, nonRed, nonRed); // I need an even number of rectangles for the color to start and end on red
+    myColor[1] = nonRed; myColor[2] = nonRed;
+    glColor4fv(myColor); // I need an even number of rectangles for the color to start and end on red
     nonRed = !nonRed; // binary flip from 0 to 1 or 1 to 0
+    // the normal vector is orthogonal to the tangent line, so it's simple (unlike the plane which follows a secant line).
+    glMaterialfv(GL_FRONT, GL_AMBIENT, myColor);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, myColor);
+    glNormal3f(Cos(i), Sin(i), 0);
+    // start creating the shape
     float x = crossRad*Cos(i);
     float radius = hookRad-x;
     // The x value of the vertex is x-hookRad, which is the same as -1*radius
@@ -289,11 +317,24 @@ void threeDCos() {
   const double cartInterval = (double) interval / 180; // cartesian interval (space between points)
   double xLoc = min;
   double zLoc = min;
+  // apply lighting
+  float white[] = {0.5, 0.5, 0.5, 1.0};
+  float blue[] =  {0.1, 0.2, 0.5, 0};
+  glColor4fv(white); // without the color, the snow mound is white. It seems like the materials don't do anything at all to the color.
+  glMaterialfv(GL_FRONT, GL_AMBIENT, blue); // these are doing absolutely nothing right now
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, blue);
+  //glMaterialfv(GL_FRONT, GL_SPECULAR, blue);
+  // b is the z position
   for(int b = -90; b < 90; b+= interval) {
     xLoc = min;
     glBegin(GL_QUAD_STRIP);
+    // a is the x position
     for(int a = -90; a <= 90; a += interval) {
+      // the normal is the gradient of the function, where the function value is y
+      glNormal3f(0.5*3.14159*Sin(a), 1.0, 0.5*3.14159*Sin(b));
       glVertex3f(xLoc, 0.5*Cos(b)+0.5*Cos(a)-0.5, zLoc);
+      // without this normal, the mound appears to have flat shading even when the mode is smooth shading
+      glNormal3f(0.5*3.14159*Sin(a), 1.0, 0.5*3.14159*Sin(b+interval));
       glVertex3f(xLoc, 0.5*Cos(b+interval)+0.5*Cos(a)-0.5, zLoc+cartInterval); // the next row of z
       xLoc += cartInterval;
     }
@@ -340,11 +381,36 @@ void display() {
     default:
       Fatal("This mode should not exist: mode %d", mode);
   }
+  glDisable(GL_LIGHTING);
+  displayAxes();
+
+  // now, start color settings and draw the things which have color
+  float Ambient[]   = {0.01*ambient ,0.01*ambient ,0.01*ambient ,1.0};
+  float Diffuse[]   = {0.01*diffuse ,0.01*diffuse ,0.01*diffuse ,1.0};
+  float Position[]  = {-2.0, 3.0, 0.0, 1.0};
+  glEnable(GL_NORMALIZE);
+  glEnable(GL_LIGHTING);
+  glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);
+  glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+  glEnable(GL_COLOR_MATERIAL);
+  glEnable(GL_LIGHT0);
+  // set the intenisty and color of each type of lighting for light 0, plus set the position
+  glLightfv(GL_LIGHT0, GL_AMBIENT, Ambient);
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, Diffuse);
+  glLightfv(GL_LIGHT0, GL_POSITION, Position);
+  Circle(15, 1, Position[0], Position[1], Position[2]);
+  // choose flat or smooth lighting
+  glShadeModel(GL_SMOOTH);
+
   // store our view of the projection by pushing the matrix
   glPushMatrix();
-  displayAxes();
+
   // create the base plate
-  glColor3ub(34, 139, 34); // forest green
+  float forestGreen[] = {34/255.0, 139/255.0, 34/255.0, 1.0};
+  glColor4fv(forestGreen);
+  glMaterialfv(GL_FRONT, GL_AMBIENT, forestGreen);
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, forestGreen);
+  glNormal3f(0, 1, 0);
   glBegin(GL_QUADS);
   glVertex3f(0.8*dim, 0, 0.8*dim); //make sure to have CCW winding
   glVertex3f(0.8*dim, 0, -0.8*dim);
