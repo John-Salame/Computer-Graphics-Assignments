@@ -1,7 +1,7 @@
 #ifndef CANDY_CANE
 #define CANDY_CANE
 
-#include "CSCIx229.h"
+#include "myCSCI5229.h"
 
 void Circle(float circlePrecision, float r, float ox, float oy, float oz);
 void RedStripedCylinderWall(int circlePrecision, float crossRad, float straightHeight);

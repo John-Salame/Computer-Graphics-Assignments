@@ -5,29 +5,8 @@
  * Due 10/6/22
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-// math defines https://stackoverflow.com/questions/1727881/how-to-use-the-pi-constant-in-c
-#define _USE_MATH_DEFINES 
-#include <math.h>
-// begin including OpenGL stuff
-#ifdef USEGLEW
-#include <GL/glew.h>
-#endif
-#define GL_GLEXT_PROTOTYPES
-#ifdef __APPLE__
-#include <GLUT/glut.h>
-// Tell Xcode IDE to not gripe about OpenGL deprecation
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#else
-#include <GL/glut.h>
-#endif
-//  Default resolution
-//  For Retina displays compile with -DRES=2
-#ifndef RES
-#define RES 1
-#endif
+#include "myCSCI5229.h"
+#include "scenes.h"
 
 // Forward declarations
 void updateFpVecs();
@@ -51,11 +30,14 @@ double asp; // aspect ratio, used to keep the proportions of an object constant 
 // lighting related globals
 int ambient = 10;
 int diffuse = 20; // low diffuse for night-time lighting
+int light = 1; // bool to enable lighting
+int scene = 0; // choose which scene to render
 
 // BEGIN UTILITY FUNCTIONS
 
-
-void init() {
+// set the global variables to reflect the default view of scene 0
+// Note: Implementation is tightly coupled to the global variables of the main script
+void initScene0() {
   th = 55;
   ph = 20;
   dim = 20.0;
@@ -73,59 +55,20 @@ void init() {
   updateFpVecs(); // recalculate forward and up using fpTh and fpPh
 }
 
-/* sin function with degrees as input */
-float Sin(float angle) {
-  float newAngle = 3.14159 * angle / 180.0;
-  return sin(newAngle);
-}
-
-/* cos function with degrees as input */
-float Cos(float angle) {
-  float newAngle = 3.14159 * angle / 180.0;
-  return cos(newAngle);
-}
-
-/*
- * Convenience function for text taken from example 4
- */
-#define LEN 8192  //  Maximum amount of text
-void Print(const char* format , ...)
-{
-   char    buf[LEN]; // Text storage
-   char*   ch=buf;   // Text pointer
-   //  Create text to be display
-   va_list args;
-   va_start(args,format);
-   vsnprintf(buf,LEN,format,args);
-   va_end(args);
-   //  Display text string
-   while (*ch)
-      glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18,*ch++);
-}
-
-/*
- *  Print message to stderr and exit
- */
-void Fatal(const char* format , ...) {
-   va_list args;
-   va_start(args,format);
-   vfprintf(stderr,format,args);
-   va_end(args);
-   exit(1);
-}
-
-/*
- *  Function to print any errors encountered
- */
-void ErrCheck(char* where)
-{
-   int err = glGetError();
-   if (err) fprintf(stderr,"ERROR: %s [%s]\n",gluErrorString(err),where);
+// depends on "scene" global variable
+void init() {
+  switch(scene) {
+    case 0:
+      initScene0();
+      break;
+    default:
+      Fatal("Scene %d does not exist", scene);
+  }
 }
 
 /* Update the forward and up vectors for first-person mode */
 void updateFpVecs() {
-  // The following calculations are based on rotating (0, 0, -1) around y-axis and then x-axis.
+  // The following calculations are based on rotating (0, 0, -1) around x-axis and then y-axis.
   // However, since we want left to turn left (counter-clockwise) and right to turn right (clockwise),
   // we invert the change in first-person theta so the right key makes a negative change to fpTh,
   // which makes a positive change in x from the initial forward direction.
@@ -133,7 +76,7 @@ void updateFpVecs() {
   forward[1] = Sin(fpPh);
   forward[2] = -Cos(fpTh)*Cos(fpPh);
   // Now, calculate the up vector under the same assumptions
-  up[0] = Sin(fpTh)*Sin(fpPh); // this isn't very intuitive. Let's see if it feels natural.
+  up[0] = Sin(fpTh)*Sin(fpPh);
   up[1] = Cos(fpPh);
   up[2] = Cos(fpTh)*Sin(fpPh);
 }
@@ -197,114 +140,6 @@ void displayAxes() {
 
 // BEGIN OBJECT DEFINITIONS
 
-
-/* Draw a circle with intervals of circlePrecision degrees and radius r at origin (ox, oy, oz) */
-void Circle(float circlePrecision, float r, float ox, float oy, float oz) {
-  float white[] = {1, 1, 1, 1};
-  glColor4fv(white);
-  glMaterialfv(GL_FRONT, GL_AMBIENT, white);
-  glMaterialfv(GL_FRONT, GL_DIFFUSE, white);
-  glNormal3f(0, 0, 1); // normal is just the front plane's normal, which is z for this circle
-  glBegin(GL_TRIANGLE_FAN);
-  glVertex3f(ox, oy, oz); // center of triangle fan
-  for(int i=0; i<=360; i+=circlePrecision) {
-    glVertex3f(ox+r*Cos(i), oy+r*Sin(i), oz);
-  }
-  glEnd();
-  ErrCheck("circle");
-}
-
-/* Helper function for candy cane, makes a cylinder wall with radius crossRad and height straightHeight */
-void RedStripedCylinderWall(int circlePrecision, float crossRad, float straightHeight) {
-  float quadHeight = straightHeight / 5.0; // split the cylinder length-wise into multiple quads so lighting works close-up
-  float nonRed = 1.0; // 1.0 when white stripe, 0.0 when red stripe
-  float myColor[4];
-  myColor[0] = 1.0;
-  myColor[3] = 1.0;
-  for(float j=0; j<straightHeight; j+=quadHeight) {
-    nonRed = 1.0; // prevent a bug that misaligned the stripes on the next layer of quads
-    glBegin(GL_QUAD_STRIP);
-    for(int i=0; i<=360; i+=circlePrecision) {
-      myColor[1] = nonRed; myColor[2] = nonRed;
-      glColor4fv(myColor); // I need an even number of rectangles for the color to start and end on red
-      nonRed = !nonRed; // binary flip from 0 to 1 or 1 to 0
-      glMaterialfv(GL_FRONT, GL_AMBIENT, myColor);
-      glMaterialfv(GL_FRONT, GL_DIFFUSE, myColor);
-      glNormal3f(Cos(i), Sin(i), 0); // here, the normal vector is along the radius
-      glVertex3f(crossRad*Cos(i), crossRad*Sin(i), j);
-      glVertex3f(crossRad*Cos(i), crossRad*Sin(i), j+quadHeight);
-    }
-    glEnd();
-  }
-}
-
-/* 
- * Create a pseudo-cylinder segment of the hook part of the candy cane
- * @param int circlePrecision - how many degrees a quad takes up, and also how many degrees of the curve a hook segment spans
- * @param float crossRad - the radius of the circular cross section
- * @param float hookRad - the radius of the hook curve (distance from the center of the curve to the center of the circular cross section)
- */
-void RedStripedHookSegment(int circlePrecision, float crossRad, float hookRad) {
-  float nonRed = 1.0;
-  float myColor[4];
-  myColor[0] = 1.0;
-  myColor[3] = 1.0;
-  int hookDeg = circlePrecision;
-  float secantAngle = (float) hookDeg/2; // x in the image hookProof.JPG
-  glBegin(GL_QUAD_STRIP);
-  // Draw the quads, which have variable height based on how far out they are
-  for(int i=0; i <=360; i+=hookDeg) {
-    myColor[1] = nonRed; myColor[2] = nonRed;
-    glColor4fv(myColor); // I need an even number of rectangles for the color to start and end on red
-    nonRed = !nonRed; // binary flip from 0 to 1 or 1 to 0
-    // the normal vector is orthogonal to the tangent line, so it's simple (unlike the plane which follows a secant line).
-    glMaterialfv(GL_FRONT, GL_AMBIENT, myColor);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, myColor);
-    glNormal3f(Cos(i), Sin(i), 0); // here, the normal vector is along the radius
-    // start creating the shape
-    float x = crossRad*Cos(i);
-    float radius = hookRad-x;
-    // The x value of the vertex is x-hookRad, which is the same as -1*radius
-    glVertex3f(-radius, crossRad*Sin(i), 0);
-    // Here we explain what is shown in my proof, hookProof.JPG
-    // The "top" of the "cylinder" is found by following the secant line from the current hook segment to the start of the next hook segment.
-    // The equation to do this is 2*hookRad*sin(hookDeg/2) and the direction of the secant line is the tangent line rotated by (hookDeg/2).
-    // We rotate (0, 0, secantLength) counter-clockwise around the y-axis (positive) by (hookDeg/2).
-    // From the 3D rotation matrix, sin(hookDeg/2) is (z*sin(hookDeg/2), 0, z*cos(hookDeg/2))
-    //   = (secantLength*sin(hookDeg/2), 0, secantLength*cos(hookDeg/2)).
-    //   We call hookDeg/2 the secantAngle.
-    float secantLength = 2*radius*Sin(secantAngle);
-    glVertex3f(-radius+secantLength*Sin(secantAngle), crossRad*Sin(i), secantLength*Cos(secantAngle));
-  }
-  glEnd();
-}
-
-/*
- * Create a candy cane with the bottom at the origin of the model matrix
- * @param float crossRad - radius of the cross section
- * @param float straightHeight - height of the tall straight part before the hook
- * @param float hookRad - the radius of the curve that makes the hook
- * @param float hookDeg - the length of the hook's sweep path in degrees (180 would make a half-circle)
- */
-void CandyCane(float crossRad, float straightHeight, float hookRad, int hookDeg) {
-  glPushMatrix();
-  glRotatef(-90, 1.0, 0, 0); // make it so y is up for the candy cane instead of z. I have this because I initially thought z was pointing up.
-  int circlePrecision = 15; // degrees per rectangle making up a cylinder
-  // First, make a circle at the base of the candy cane
-  Circle(circlePrecision, crossRad, 0, 0, 0);
-  // Now, make the tall straight cylinder
-  RedStripedCylinderWall(circlePrecision, crossRad, straightHeight);
-  // Now, make the hook
-  glTranslatef(hookRad, 0, straightHeight);
-  for(int i=0; i<hookDeg; i+=circlePrecision) {
-    RedStripedHookSegment(circlePrecision, crossRad, hookRad);
-    glRotatef(circlePrecision, 0, 1.0, 0); // rotate the curve origin so the next segment starts at the end of the previous segment
-  }
-  Circle(circlePrecision, crossRad, -hookRad, 0, 0);
-  glPopMatrix();
-  ErrCheck("candy cane");
-}
-
 /*
  * The positive part of a 3D Cosine wave centered at (0, 0)
  * Equation: y = 0.5*Cos(180*x)+0.5*Cos(180*z)-0.5, domain x e [-0.5, 0.5], z e [-0.5, 0.5]
@@ -321,7 +156,7 @@ void threeDCos() {
   float white[] = {1.0, 1.0, 1.0, 1.0}; // Note: The lighting will be such that the snow appears gray at night (lighting enabled = night)
   float blue[] =  {0.1, 0.2, 0.5, 0};
   glColor4fv(white); // without the color, the snow mound is white. It seems like the materials don't do anything at all to the color.
-  glMaterialfv(GL_FRONT, GL_AMBIENT, blue); // these are doing absolutely nothing right now
+  glMaterialfv(GL_FRONT, GL_AMBIENT, blue); // snow looks blue at night
   glMaterialfv(GL_FRONT, GL_DIFFUSE, blue);
   //glMaterialfv(GL_FRONT, GL_SPECULAR, blue);
   // b is the z position
@@ -384,14 +219,13 @@ void display() {
   glDisable(GL_LIGHTING);
   displayAxes();
 
-  // now, start color settings and draw the things which have color
+  // now, start lighting settings and then draw objects
   float Ambient[]   = {0.01*ambient ,0.01*ambient ,0.01*ambient ,1.0};
   //float Diffuse[]   = {0.01*diffuse ,0.01*diffuse ,0.00*diffuse ,1.0}; // yellow light, like a lamp
   float Diffuse[]   = {0.01*diffuse ,0.01*diffuse ,0.05*diffuse ,1.0}; // yellow light with a tinge of blue (moonlight?); allows the snow's blue properties to show
-  //float Position[]  = {-2.0, 3.0, 0.0, 1.0};
-  float Position[] = {dim*Cos(th), dim*Sin(ph), dim*-Sin(th)*Cos(ph), 1.0}; // follow the camera roughly
-  // Draw a circle where the light will be. Draw it before lighting is enabled.
-  Circle(15, 1, Position[0], Position[1], Position[2]);
+  float Position[4]; // set the position of light 0 lower down, based on the scene we want to render
+  
+  // enable lighting and unit vector normals
   glEnable(GL_NORMALIZE);
   glEnable(GL_LIGHTING);
   // location of viewer for specular light calculations. I'm not sure what the difference is, even from testing example 13.
@@ -403,66 +237,21 @@ void display() {
   // set the intenisty and color of each type of lighting for light 0, plus set the position
   glLightfv(GL_LIGHT0, GL_AMBIENT, Ambient);
   glLightfv(GL_LIGHT0, GL_DIFFUSE, Diffuse);
-  glLightfv(GL_LIGHT0, GL_POSITION, Position);
   // choose flat or smooth lighting
   glShadeModel(GL_SMOOTH);
+  
+  // AT THIS POINT, LIGHT0 HAS NO POSITION! HANDLE THAT IN THE SCENE YOU DRAW.
+  if(scene == 0) {
+    Position[0] = dim*Cos(th);
+    Position[1] = dim*Sin(ph);
+    Position[2] = dim*-Sin(th)*Cos(ph);
+    Position[3] = 1.0;
+  }
+  
+  // Create the objects in the scene
+  scene0(light, Position, dim);
 
-  // store our view of the projection by pushing the matrix
-  glPushMatrix();
-
-  // create the base plate
-  float forestGreen[] = {34/255.0, 139/255.0, 34/255.0, 1.0};
-  glColor4fv(forestGreen);
-  glMaterialfv(GL_FRONT, GL_AMBIENT, forestGreen);
-  glMaterialfv(GL_FRONT, GL_DIFFUSE, forestGreen);
-  glNormal3f(0, 1, 0); // the normal vector of the ground is up
-  glBegin(GL_QUADS);
-  glVertex3f(0.8*dim, 0, 0.8*dim); //make sure to have CCW winding
-  glVertex3f(0.8*dim, 0, -0.8*dim);
-  glVertex3f(-0.8*dim, 0, -0.8*dim);
-  glVertex3f(-0.8*dim, 0, 0.8*dim);
-  glEnd();
-  // place some candy canes
-  CandyCane(0.8, 4.0, 1.5, 180);
-  glTranslatef(2.0, -1.0, 2.0); // offset from the previous candy cane
-  glRotatef(60, 0, 1.0, 0); //rotate around the candy cane axis
-  CandyCane(1.0, 7.0, 1.3, 160);
-  // put me back at the origin of the projection by popping and pushing
-  glPopMatrix();
-  glPushMatrix();
-  // create a snow mound at (5, 0, -8)
-  glTranslatef(5, 0, -8);
-  glPushMatrix(); // so I can make a small candy cane at this position soon
-  glScalef(6.0, 2.0, 5.0);
-  threeDCos();
-  glPopMatrix();
-  glPushMatrix();
-  // make a small tilted candy cane in the snow pile
-  glTranslatef(0.1, 0.5, 0);
-  glRotatef(-30, 0, 0, 1);
-  glRotatef(-30, 1, 0, 0);
-  CandyCane(0.2, 1.2, 0.3, 160);
-  glPopMatrix(); // return to the state of the first snow pile
-  // make one more snow pile, but smaller and taller
-  glTranslatef(-3, 0, -2);
-  glScalef(4.5, 3.5, 5.0);
-  threeDCos();
-  // return to the origin of the scene and save it again
-  glPopMatrix();
-  glPushMatrix();
-  // make a large, shallow snow pile between the large candy canes and the overhead view
-  glTranslatef(-6, 0, 8);
-  glPushMatrix();
-  glScalef(10, 2.5, 10);
-  threeDCos();
-  glPopMatrix();
-  // make a candy cane in the large snow pile
-  glTranslatef(1, 0, 0);
-  glRotatef(-15, 0, 0, 1);
-  glRotatef(-120, 0, 1, 0);
-  CandyCane(0.4, 2, 0.6, 210);
-  // Cleanup: reset the matrix in the state machine
-  glPopMatrix();
+  // Cleanup: reset the matrix in the state machine (this should undo any viewpoint or projection)
   glPopMatrix();
   // render the scene
   ErrCheck("display");
