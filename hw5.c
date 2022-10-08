@@ -18,7 +18,7 @@ int th; // angle around y-axis
 int ph; // angle around x-axis
 // projection variables
 double dim; // width and height of the orthographic projection
-int mode = 0; // begin in orthogonal projection
+int mode = 2; // begin in first-person projection
 int fov;
 double asp; // aspect ratio, used to keep the proportions of an object constant when resizing the windowa
 // first-person variables
@@ -32,6 +32,7 @@ double walk; // how much to walk with each step
 int day; // flag for day/night, sun/moon
 int ambient;
 int diffuse; // low ambient and diffuse for night-time lighting
+int specular;
 int light; // bool to enable lighting
 int lTh; // theta and phi of the light; sun and moon use only theta.
 float lZ; // z value of the light
@@ -57,16 +58,11 @@ void initScene0() {
   // Start with an angle away from the standard forward.
   // With this style, I can have a nice starting view also with easy calculations 
   // because I only have one dimension on forward to worry about.
-  fpTh = -290;
+  fpTh = -30;
   fpPh = 5;
-  eye[0]=12.046; eye[1]=2.0; eye[2]=4.404;
+  eye[0]=-10.0; eye[1]=2.0; eye[2]=14.0;
   updateFpVecs(); // recalculate forward and up using fpTh and fpPh
-  // night-time lighting values
-  /*
-  day = 0;
-  ambient = 10;
-  diffuse = 20;
-  */
+  day = 1;
 }
 
 // depends on "scene" global variable
@@ -82,8 +78,7 @@ void init() {
   forward[0]=0; forward[1]=0; forward[2]=-1;
   up[0]=0; up[1]=1; up[2]=0;
   eye[0]=0; eye[1]=0; eye[2]=dim;
-  ambient = 10;
-  diffuse = 50;
+  // light settings (other than day-night, which are in display()) 
   light = 1;
   lTh = 0;
   lZ = 0;
@@ -181,8 +176,25 @@ void display() {
   double Ex;
   double Ey;
   double Ez;
+  // decide if it's day or night (for scene 0), then choose the background color
+  lTh %= 360; // keep it in +/- 360 degrees 
+  if (lTh >= 0 && lTh < 180) {
+    day = 1; //day
+  }
+  else {
+    day = 0; // night
+  }
+  // choose the background color
+  if (scene == 0 && day) {
+    glClearColor(0.2, 0.4, 1.0, 1.0); // blue sky
+  }
+  else {
+    glClearColor(0, 0, 0, 1); // black background by default
+  }
+  // clear the buffers and apply the background color
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glLoadIdentity(); // maybe it will solve the lighting bug?
+  glLoadIdentity();
+  // set the view angle or first-person perspective view
   switch(mode) {
     // Orthogonal Overhead
     case 0:
@@ -213,40 +225,67 @@ void display() {
   displayAxes();
 
   // now, start lighting settings and then draw objects
-  float Ambient[]   = {0.01*ambient ,0.01*ambient ,0.01*ambient ,1.0};
+  // first, get rid of any left-over material properties from the state
+  float zero[] = {0, 0, 0, 1.0}; // resets the material colors
+  glMaterialfv(GL_FRONT, GL_AMBIENT, zero);
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, zero);
+  glMaterialfv(GL_FRONT, GL_SPECULAR, zero);
+  // determine if it is night or day (currently only matters for scene 0)
+  // set night light properties
+  if(scene == 0 && day == 0) {
+    ambient = 10;
+    diffuse = 20;
+    specular = 20;
+    glDisable(GL_LIGHT0);
+    glEnable(GL_LIGHT1); // only use the moon at night-time
+  }
+  else {
+    // find daytime light settings in init()
+    ambient = 30;
+    diffuse = 50;
+    specular = 20;
+    glEnable(GL_LIGHT0);
+    glDisable(GL_LIGHT1); // only use light 1 on scene 0 night-time
+  }
+  // set the light properties
+  float Ambient[]   = {0.01*ambient ,0.01*ambient ,0.02*ambient ,1.0}; // slightly blue since the sky is blue
   float Diffuse[]   = {0.01*diffuse ,0.01*diffuse ,0.01*diffuse ,1.0};
-  //float Diffuse[]   = {0.01*diffuse ,0.01*diffuse ,0.05*diffuse ,1.0}; // mostly blue light; allows the snow's blue properties to show
-  // Position is light0 rotation from (1, 0)
-  float Position[] = {dim*Cos(lTh), 0, -dim*Sin(lTh), 1.0}; // rotate light around the y-axis starting from (1, 0, 0)
+  float Specular[] = {0.01*specular, 0.01*specular, 0.01*specular, 1.0};
+  // set the light positions
+  // l0Position is light0 rotation from (1, 0)
+  float l0Position[] = {dim*Cos(lTh), 0, -dim*Sin(lTh), 1.0}; // rotate light around the y-axis starting from (1, 0, 0)
+  float l1Position[] = {-dim*Cos(lTh), 0, dim*Sin(lTh), 1.0}; // opposite side from l0; represents the moon in scene 1
   
   // create unit vector normals
   glEnable(GL_NORMALIZE);
   // location of viewer for specular light calculations. I'm not sure what the difference is, even from testing example 13.
-  glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);
+  glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 0);
   glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
   glEnable(GL_COLOR_MATERIAL); // without this enabled, the glColor4fv does not apply, but the materials do
-  // use light 0
-  glEnable(GL_LIGHT0);
-  // set the intenisty and color of each type of lighting for light 0, plus set the position
+  // set the intenisty and color of each type of lighting for lights 0 and 1
   glLightfv(GL_LIGHT0, GL_AMBIENT, Ambient);
   glLightfv(GL_LIGHT0, GL_DIFFUSE, Diffuse);
+  glLightfv(GL_LIGHT0, GL_SPECULAR, Specular);
+  glLightfv(GL_LIGHT1, GL_AMBIENT, Ambient);
+  glLightfv(GL_LIGHT1, GL_DIFFUSE, Diffuse);
+  glLightfv(GL_LIGHT1, GL_SPECULAR, Specular);
   // choose flat or smooth lighting
   glShadeModel(GL_SMOOTH); //GL_SMOOTH or GL_FLAT
   
   // AT THIS POINT, LIGHT0 HAS NO POSITION! HANDLE THAT IN THE SCENE YOU DRAW.
   if(scene == 0) {
     // Create the objects in the scene
-    scene0(light, Position, dim);
+    scene0(dim, light, l0Position, l1Position, day);
   }
   // display one of the simple scenes with a light rotating around an object
   else {
     glPushMatrix(); // in case I choose to do any rotation or scaling in the scenes
     // raise or lower the light
-    Position[1] += lZ;
+    l0Position[1] += lZ;
     glDisable(GL_LIGHTING);
     if(light) {
-      ball(Position[0], Position[1], Position[2], 0.5);
-      glLightfv(GL_LIGHT0, GL_POSITION, Position);
+      ball(l0Position[0], l0Position[1], l0Position[2], 0.5);
+      glLightfv(GL_LIGHT0, GL_POSITION, l0Position);
       // finally enable lighting
       glEnable(GL_LIGHTING);
     }
@@ -408,7 +447,11 @@ void idle()
 {
    //  Elapsed time in seconds
    double t = glutGet(GLUT_ELAPSED_TIME)/1000.0;
-   lTh = fmod(90*t,360.0);
+   // slow down the light's rotation on scene 0 (day and night cycle)
+   if (scene == 0)
+     lTh = fmod(30*t,360.0);
+   else
+     lTh = fmod(90*t,360.0);
    //  Tell GLUT it is necessary to redisplay the scene
    glutPostRedisplay();
 }

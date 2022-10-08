@@ -18,10 +18,11 @@ void threeDCos() {
   double zLoc = min;
   // apply lighting
   float white[] = {1.0, 1.0, 1.0, 1.0}; // Note: The lighting will be such that the snow appears gray at night (lighting enabled = night)
-  float blue[] =  {0.1, 0.2, 0.5, 0};
+  float blue[] =  {0.1, 0.2, 0.4, 1.0};
   glColor4fv(white); // without the color, the snow mound is white. It seems like the materials don't do anything at all to the color.
-  glMaterialfv(GL_FRONT, GL_AMBIENT, blue); // snow looks blue at night
-  glMaterialfv(GL_FRONT, GL_DIFFUSE, blue);
+  glMaterialfv(GL_FRONT, GL_AMBIENT, white); // snow looks blue at night
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, white);
+  glMaterialfv(GL_FRONT, GL_SPECULAR, blue);
   //glMaterialfv(GL_FRONT, GL_SPECULAR, blue);
   // b is the z position
   for(int b = -90; b < 90; b+= interval) {

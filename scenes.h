@@ -8,7 +8,7 @@
 #ifndef SCENES
 #define SCENES
 
-void scene0(int light, float Position[4], int dim);
+void scene0(int dim, int light, float l0Position[4], float l1Position[4], int day);
 
 #endif
 

@@ -7,9 +7,11 @@
 /* Draw a circle with intervals of circlePrecision degrees and radius r at origin (ox, oy, oz) */
 void Circle(float circlePrecision, float r, float ox, float oy, float oz) {
   float white[] = {1, 1, 1, 1};
+  float zero[] = {0, 0, 0, 1.0}; // resets the material colors
   glColor4fv(white);
   glMaterialfv(GL_FRONT, GL_AMBIENT, white);
   glMaterialfv(GL_FRONT, GL_DIFFUSE, white);
+  glMaterialfv(GL_FRONT, GL_SPECULAR, zero);
   glNormal3f(0, 0, -1); // normal is just the front plane's normal, which is z for this circle
   glBegin(GL_TRIANGLE_FAN);
   glVertex3f(ox, oy, oz); // center of triangle fan
@@ -27,6 +29,10 @@ void RedStripedCylinderWall(int circlePrecision, float crossRad, float straightH
   float myColor[4];
   myColor[0] = 1.0;
   myColor[3] = 1.0;
+  // set the specular material
+  //float light_gray[] = {0.2, 0.2, 0.2, 1.0};
+  //glMaterialfv(GL_FRONT, GL_SPECULAR, light_gray);
+  // draw the object
   for(float j=0; j<straightHeight; j+=quadHeight) {
     nonRed = 1.0; // prevent a bug that misaligned the stripes on the next layer of quads
     glBegin(GL_QUAD_STRIP);
@@ -56,6 +62,10 @@ void RedStripedHookSegment(int circlePrecision, float crossRad, float hookRad) {
   float myColor[4];
   myColor[0] = 1.0;
   myColor[3] = 1.0;
+  // set the specular material
+  //float light_gray[] = {0.2, 0.2, 0.2, 1.0};
+  //glMaterialfv(GL_FRONT, GL_SPECULAR, light_gray);
+  // prepare the calculations and draw the object
   int hookDeg = circlePrecision;
   float secantAngle = (float) hookDeg/2; // x in the image hookProof.JPG
   glBegin(GL_QUAD_STRIP);
