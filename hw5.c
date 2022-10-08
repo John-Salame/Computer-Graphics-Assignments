@@ -5,64 +5,100 @@
  * Due 10/6/22
  */
 
-#include "myCSCI5229.h"
-#include "scenes.h"
+#include "myCSCI5229.h" // OpenGL and some helper functions come from here
+#include "scenes.h" // also includes individual objects we can draw
 
 // Forward declarations
 void updateFpVecs();
+void idle();
 
 // Begin global variables
 // Normally, it's good to initialize everything. However, I will initialize things in init() so I can make a reset functionality.
 int th; // angle around y-axis
 int ph; // angle around x-axis
+// projection variables
 double dim; // width and height of the orthographic projection
-int mode; // begin in orthogonal projection
+int mode = 0; // begin in orthogonal projection
+int fov;
+double asp; // aspect ratio, used to keep the proportions of an object constant when resizing the windowa
+// first-person variables
 int fpTh; // first-person theta
 int fpPh; // first-person phi
 double forward[3]; // first-person forward unit vector
 double up[3]; // first-person up unit vector
 double eye[3]; // first-person eye position
 double walk; // how much to walk with each step
-// Projection-related stuff
-int fov;
-double asp; // aspect ratio, used to keep the proportions of an object constant when resizing the windowa
-
 // lighting related globals
-int ambient = 10;
-int diffuse = 20; // low diffuse for night-time lighting
-int light = 1; // bool to enable lighting
+int day; // flag for day/night, sun/moon
+int ambient;
+int diffuse; // low ambient and diffuse for night-time lighting
+int light; // bool to enable lighting
+int lTh; // theta and phi of the light; sun and moon use only theta.
+float lZ; // z value of the light
+// other display variables
 int scene = 0; // choose which scene to render
+int numScenes = 3;
+int controlLight = 0; // when enabled, you can stop the light and move it around with arrow keys
+int pause = 0; // when enabled, stop the light
 
 // BEGIN UTILITY FUNCTIONS
+
+void changeScene(int dir) {
+  scene = (scene + numScenes + dir) % numScenes; // dir can be 1 or -1 to go to next or previous scene
+}
 
 // set the global variables to reflect the default view of scene 0
 // Note: Implementation is tightly coupled to the global variables of the main script
 void initScene0() {
+  // overrides for scene 0
+  dim = 20.0;
   th = 55;
   ph = 20;
-  dim = 20.0;
-  mode = 0;
   // Start with an angle away from the standard forward.
   // With this style, I can have a nice starting view also with easy calculations 
   // because I only have one dimension on forward to worry about.
   fpTh = -290;
   fpPh = 5;
-  forward[0]=0; forward[1]=0; forward[2]=-1;
-  up[0]=0; up[1]=1; up[2]=0;
   eye[0]=12.046; eye[1]=2.0; eye[2]=4.404;
-  walk = 0.25;
-  fov = 55;
   updateFpVecs(); // recalculate forward and up using fpTh and fpPh
+  // night-time lighting values
+  /*
+  day = 0;
+  ambient = 10;
+  diffuse = 20;
+  */
 }
 
 // depends on "scene" global variable
 void init() {
+  // defaults for every scene
+  dim = 5.0;
+  th = 0;
+  ph = 0;
+  fov = 55;
+  walk = 0.25;
+  fpTh = 0;
+  fpPh = 0;
+  forward[0]=0; forward[1]=0; forward[2]=-1;
+  up[0]=0; up[1]=1; up[2]=0;
+  eye[0]=0; eye[1]=0; eye[2]=dim;
+  ambient = 10;
+  diffuse = 50;
+  light = 1;
+  lTh = 0;
+  lZ = 0;
   switch(scene) {
     case 0:
       initScene0();
       break;
+    case 1:
+      // do nothing
+      break;
+    case 2:
+      // do nothing
+      break;
     default:
-      Fatal("Scene %d does not exist", scene);
+      Fatal("Scene %d does not exist\n", scene);
   }
 }
 
@@ -99,13 +135,13 @@ void Project() {
       ErrCheck("Project First-Person");
       break;
     default:
-      Fatal("This mode should not exist: mode %d", mode);
-    // Switch to manipulating the model matrix
-    glMatrixMode(GL_MODELVIEW);
-    // Undo previous transformations
-    glLoadIdentity();
-    ErrCheck("Project");
+      Fatal("This mode should not exist: mode %d", mode);  
   }
+  // Switch to manipulating the model matrix
+  glMatrixMode(GL_MODELVIEW);
+  // Undo previous transformations
+  glLoadIdentity();
+  ErrCheck("Project");
 }
 
 /* Helper function to display the coordinate axes */
@@ -137,49 +173,6 @@ void displayAxes() {
 }
 
 
-
-// BEGIN OBJECT DEFINITIONS
-
-/*
- * The positive part of a 3D Cosine wave centered at (0, 0)
- * Equation: y = 0.5*Cos(180*x)+0.5*Cos(180*z)-0.5, domain x e [-0.5, 0.5], z e [-0.5, 0.5]
- * Good for making mounds of snow
- */
-void threeDCos() {
-  const double min = -0.5;
-  // we do not need a variable for it, but the max is 0.5
-  const int interval = 15; // angular interval
-  const double cartInterval = (double) interval / 180; // cartesian interval (space between points)
-  double xLoc = min;
-  double zLoc = min;
-  // apply lighting
-  float white[] = {1.0, 1.0, 1.0, 1.0}; // Note: The lighting will be such that the snow appears gray at night (lighting enabled = night)
-  float blue[] =  {0.1, 0.2, 0.5, 0};
-  glColor4fv(white); // without the color, the snow mound is white. It seems like the materials don't do anything at all to the color.
-  glMaterialfv(GL_FRONT, GL_AMBIENT, blue); // snow looks blue at night
-  glMaterialfv(GL_FRONT, GL_DIFFUSE, blue);
-  //glMaterialfv(GL_FRONT, GL_SPECULAR, blue);
-  // b is the z position
-  for(int b = -90; b < 90; b+= interval) {
-    xLoc = min;
-    glBegin(GL_QUAD_STRIP);
-    // a is the x position
-    for(int a = -90; a <= 90; a += interval) {
-      // the normal is the gradient of the function, where the function value is y
-      glNormal3f(0.5*3.14159*Sin(a), 1.0, 0.5*3.14159*Sin(b));
-      glVertex3f(xLoc, 0.5*Cos(b)+0.5*Cos(a)-0.5, zLoc);
-      // without this normal, the mound appears to have flat shading even when the mode is smooth shading
-      glNormal3f(0.5*3.14159*Sin(a), 1.0, 0.5*3.14159*Sin(b+interval));
-      glVertex3f(xLoc, 0.5*Cos(b+interval)+0.5*Cos(a)-0.5, zLoc+cartInterval); // the next row of z
-      xLoc += cartInterval;
-    }
-    glEnd();
-    zLoc += cartInterval;
-  }
-}
-
-
-
 // BEGIN CALLBACK FUNCTIONS
 
 
@@ -189,8 +182,7 @@ void display() {
   double Ey;
   double Ez;
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  // prevent a bug from double rendering the scene after a reshape
-  glPushMatrix();
+  glLoadIdentity(); // maybe it will solve the lighting bug?
   switch(mode) {
     // Orthogonal Overhead
     case 0:
@@ -216,20 +208,21 @@ void display() {
     default:
       Fatal("This mode should not exist: mode %d", mode);
   }
+  // disable lighting if it is on so we can correctly draw axes
   glDisable(GL_LIGHTING);
   displayAxes();
 
   // now, start lighting settings and then draw objects
   float Ambient[]   = {0.01*ambient ,0.01*ambient ,0.01*ambient ,1.0};
-  //float Diffuse[]   = {0.01*diffuse ,0.01*diffuse ,0.00*diffuse ,1.0}; // yellow light, like a lamp
-  float Diffuse[]   = {0.01*diffuse ,0.01*diffuse ,0.05*diffuse ,1.0}; // yellow light with a tinge of blue (moonlight?); allows the snow's blue properties to show
-  float Position[4]; // set the position of light 0 lower down, based on the scene we want to render
+  float Diffuse[]   = {0.01*diffuse ,0.01*diffuse ,0.01*diffuse ,1.0};
+  //float Diffuse[]   = {0.01*diffuse ,0.01*diffuse ,0.05*diffuse ,1.0}; // mostly blue light; allows the snow's blue properties to show
+  // Position is light0 rotation from (1, 0)
+  float Position[] = {dim*Cos(lTh), 0, -dim*Sin(lTh), 1.0}; // rotate light around the y-axis starting from (1, 0, 0)
   
-  // enable lighting and unit vector normals
+  // create unit vector normals
   glEnable(GL_NORMALIZE);
-  glEnable(GL_LIGHTING);
   // location of viewer for specular light calculations. I'm not sure what the difference is, even from testing example 13.
-  glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 0);
+  glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);
   glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
   glEnable(GL_COLOR_MATERIAL); // without this enabled, the glColor4fv does not apply, but the materials do
   // use light 0
@@ -238,21 +231,39 @@ void display() {
   glLightfv(GL_LIGHT0, GL_AMBIENT, Ambient);
   glLightfv(GL_LIGHT0, GL_DIFFUSE, Diffuse);
   // choose flat or smooth lighting
-  glShadeModel(GL_SMOOTH);
+  glShadeModel(GL_SMOOTH); //GL_SMOOTH or GL_FLAT
   
   // AT THIS POINT, LIGHT0 HAS NO POSITION! HANDLE THAT IN THE SCENE YOU DRAW.
   if(scene == 0) {
-    Position[0] = dim*Cos(th);
-    Position[1] = dim*Sin(ph);
-    Position[2] = dim*-Sin(th)*Cos(ph);
-    Position[3] = 1.0;
+    // Create the objects in the scene
+    scene0(light, Position, dim);
   }
-  
-  // Create the objects in the scene
-  scene0(light, Position, dim);
+  // display one of the simple scenes with a light rotating around an object
+  else {
+    glPushMatrix(); // in case I choose to do any rotation or scaling in the scenes
+    // raise or lower the light
+    Position[1] += lZ;
+    glDisable(GL_LIGHTING);
+    if(light) {
+      ball(Position[0], Position[1], Position[2], 0.5);
+      glLightfv(GL_LIGHT0, GL_POSITION, Position);
+      // finally enable lighting
+      glEnable(GL_LIGHTING);
+    }
+    // now choose object based on scene
+    if (scene == 1)
+      CandyCane(0.5, 1.0, 1.0, 180);
+    else if (scene == 2)
+      threeDCos(); // snow pile
+    glPopMatrix();
+  } 
 
-  // Cleanup: reset the matrix in the state machine (this should undo any viewpoint or projection)
-  glPopMatrix();
+  // Display parameters
+  glWindowPos2i(5,5);
+  Print("Light: %d; Control light: %d; Pause: %d", light, controlLight, pause);
+  glWindowPos2i(5, 25);
+  Print("light theta: %d; light z: %f", lTh, lZ);
+
   // render the scene
   ErrCheck("display");
   glFlush();
@@ -274,26 +285,40 @@ void special(int key, int x, int y) {
   else if(key == GLUT_KEY_DOWN)
     dir2 = -1;
   
-  switch(mode) {
-    // Orthogonal Overhead
-    case 0:
-      // no break; intentional fall through so th and ph correlate for both overhead modes
-    // Perspective Overhead
-    case 1:
-      th += dir * thRate;
-      ph += dir2 * phRate;
-      break;
-    // Perspective First-Person
-    case 2:
-      // first person theta and phi, for turning your head
-      fpTh -= dir * thRate;
-      fpPh += dir2 * phRate;
-      fpTh %= 360;
-      fpPh %= 360;
-      updateFpVecs(); // update forward and up
-      break;
-    default:
-      Fatal("This mode should not exist: mode %d", mode);
+  // any arrow key can change the scene; bring up scene with default parameters.
+  if (glutGetModifiers() == GLUT_ACTIVE_CTRL) {
+    changeScene(dir + dir2);
+    init();
+  }
+
+  // in "control light" mode, arrow keys move the light
+  if (controlLight) {
+    lTh += dir * thRate;
+    lZ += dir2 * walk; // raise or lower the light
+  }
+  // allow the camera to move
+  else {
+    switch(mode) {
+      // Orthogonal Overhead
+      case 0:
+        // no break; intentional fall through so th and ph correlate for both overhead modes
+      // Perspective Overhead
+      case 1:
+        th += dir * thRate;
+        ph += dir2 * phRate;
+        break;
+      // Perspective First-Person
+      case 2:
+        // first person theta and phi, for turning your head
+        fpTh -= dir * thRate;
+        fpPh += dir2 * phRate;
+        fpTh %= 360;
+        fpPh %= 360;
+        updateFpVecs(); // update forward and up
+        break;
+      default:
+        Fatal("This mode should not exist: mode %d", mode);
+    }
   }
   //  Keep angles to +/-360 degrees
   th %= 360;
@@ -320,6 +345,30 @@ void key(unsigned char ch,int x,int y) {
   // M: cycle to the next view mode (projection type)
   else if (ch == 'm' || ch == 'M')
     mode = (mode + 1) % 3;
+  // L: toggle the light
+  else if (ch == 'l' || ch == 'L')
+    light = !light;
+  // C or O: control the light (stop the light from moving and allow you to move the light using arrow keys)
+  else if (ch == 'c' || ch == 'C' || ch == 'o' || ch == 'O') {
+    controlLight = !controlLight;
+    pause = 0; // "Control Light" and "pause" turn each other off
+    if (controlLight) {
+      glutIdleFunc(NULL);
+    }
+    else
+      glutIdleFunc(idle);
+  }
+  // P: pause the movement of the light but still allow the user to rotate the screen
+  else if (ch == 'p' || ch == 'P') {
+    pause = !pause;
+    controlLight = 0; // "Control Light" and "pause" turn each other off
+    if (pause)
+      glutIdleFunc(NULL);
+    else {
+      glutIdleFunc(idle);
+    }
+  } // end of pause logic
+
   // Only allow planar movement in mode 2 (first-person)
   switch(mode) {
     // I wonder if this is a security vulnerability. Would people be able to arbitrarily put any mode number and jump to some random instruction and crash the program?
@@ -355,6 +404,15 @@ void key(unsigned char ch,int x,int y) {
   glutPostRedisplay();
 }
 
+void idle()
+{
+   //  Elapsed time in seconds
+   double t = glutGet(GLUT_ELAPSED_TIME)/1000.0;
+   lTh = fmod(90*t,360.0);
+   //  Tell GLUT it is necessary to redisplay the scene
+   glutPostRedisplay();
+}
+
 void reshape(int width, int height) {
   // Set viewport as entire window
   glViewport(0, 0, RES*width, RES*height);
@@ -369,6 +427,7 @@ int main(int argc, char** argv) {
   init();
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+  glutInitWindowSize(600, 400);
   glutCreateWindow("John Salame HW5: Lighting");
 #ifdef USEGLEW
   //  Initialize GLEW
@@ -378,6 +437,7 @@ int main(int argc, char** argv) {
   glutDisplayFunc(display);
   glutSpecialFunc(special);
   glutKeyboardFunc(key);
+  glutIdleFunc(idle);
   glutReshapeFunc(reshape);
   // Enable Z-buffer depth test
   glEnable(GL_DEPTH_TEST);

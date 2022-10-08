@@ -2,7 +2,7 @@
  * Author: John Salame
  * Description: A file containing the candy cane object and related shapes
  */
-#include "candyCane.h"
+#include "objects.h"
 
 /* Draw a circle with intervals of circlePrecision degrees and radius r at origin (ox, oy, oz) */
 void Circle(float circlePrecision, float r, float ox, float oy, float oz) {
@@ -10,7 +10,7 @@ void Circle(float circlePrecision, float r, float ox, float oy, float oz) {
   glColor4fv(white);
   glMaterialfv(GL_FRONT, GL_AMBIENT, white);
   glMaterialfv(GL_FRONT, GL_DIFFUSE, white);
-  glNormal3f(0, 0, 1); // normal is just the front plane's normal, which is z for this circle
+  glNormal3f(0, 0, -1); // normal is just the front plane's normal, which is z for this circle
   glBegin(GL_TRIANGLE_FAN);
   glVertex3f(ox, oy, oz); // center of triangle fan
   for(int i=0; i<=360; i+=circlePrecision) {
@@ -51,6 +51,7 @@ void RedStripedCylinderWall(int circlePrecision, float crossRad, float straightH
  * @param float hookRad - the radius of the hook curve (distance from the center of the curve to the center of the circular cross section)
  */
 void RedStripedHookSegment(int circlePrecision, float crossRad, float hookRad) {
+  glPushMatrix();
   float nonRed = 1.0;
   float myColor[4];
   myColor[0] = 1.0;
@@ -66,11 +67,11 @@ void RedStripedHookSegment(int circlePrecision, float crossRad, float hookRad) {
     // the normal vector is orthogonal to the tangent line, so it's simple (unlike the plane which follows a secant line).
     glMaterialfv(GL_FRONT, GL_AMBIENT, myColor);
     glMaterialfv(GL_FRONT, GL_DIFFUSE, myColor);
-    glNormal3f(Cos(i), Sin(i), 0); // here, the normal vector is along the radius
     // start creating the shape
     float x = crossRad*Cos(i);
     float radius = hookRad-x;
     // The x value of the vertex is x-hookRad, which is the same as -1*radius
+    glNormal3f(Cos(i), Sin(i), 0); // here, the normal vector is along the radius
     glVertex3f(-radius, crossRad*Sin(i), 0);
     // Here we explain what is shown in my proof, hookProof.JPG
     // The "top" of the "cylinder" is found by following the secant line from the current hook segment to the start of the next hook segment.
@@ -80,9 +81,13 @@ void RedStripedHookSegment(int circlePrecision, float crossRad, float hookRad) {
     //   = (secantLength*sin(hookDeg/2), 0, secantLength*cos(hookDeg/2)).
     //   We call hookDeg/2 the secantAngle.
     float secantLength = 2*radius*Sin(secantAngle);
+    // rotate the normal vector by hookDeg along the y-axis
+    //   x=x_old*cos(rot_angle), y=y_old, z=x_old*sin(rot_angle)
+    glNormal3f(Cos(i)*Cos(hookDeg), Sin(i), -Cos(i)*Sin(hookDeg)); 
     glVertex3f(-radius+secantLength*Sin(secantAngle), crossRad*Sin(i), secantLength*Cos(secantAngle));
   }
   glEnd();
+  glPopMatrix();
 }
 
 /*
@@ -95,6 +100,7 @@ void RedStripedHookSegment(int circlePrecision, float crossRad, float hookRad) {
 void CandyCane(float crossRad, float straightHeight, float hookRad, int hookDeg) {
   glPushMatrix();
   glRotatef(-90, 1.0, 0, 0); // make it so y is up for the candy cane instead of z. I have this because I initially thought z was pointing up.
+  int i = 0; // for the loop
   int circlePrecision = 15; // degrees per rectangle making up a cylinder
   // First, make a circle at the base of the candy cane
   Circle(circlePrecision, crossRad, 0, 0, 0);
@@ -102,10 +108,13 @@ void CandyCane(float crossRad, float straightHeight, float hookRad, int hookDeg)
   RedStripedCylinderWall(circlePrecision, crossRad, straightHeight);
   // Now, make the hook
   glTranslatef(hookRad, 0, straightHeight);
-  for(int i=0; i<hookDeg; i+=circlePrecision) {
+  for(i=0; i<hookDeg; i+=circlePrecision) {
     RedStripedHookSegment(circlePrecision, crossRad, hookRad);
-    glRotatef(circlePrecision, 0, 1.0, 0); // rotate the curve origin so the next segment starts at the end of the previous segment
+    glRotatef(circlePrecision, 0, 1.0, 0);
+    //glRotatef(circlePrecision, 0, 1.0, 0); // rotate the curve origin so the next segment starts at the end of the previous segment
   }
+  // make sure the bottom of the circle is down
+  glRotatef(180, 1.0, 0, 0);
   Circle(circlePrecision, crossRad, -hookRad, 0, 0);
   glPopMatrix();
   ErrCheck("candy cane");

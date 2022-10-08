@@ -1,6 +1,6 @@
 # HW5
 EXE=hw5
-SCENE_DEPS=myCSCI5229.h candyCane.h scenes.h
+SCENE_DEPS=myCSCI5229.h objects.h scenes.h
 
 # Main target
 all: $(EXE)
@@ -33,16 +33,20 @@ fatal.o: fatal.c myCSCI5229.h
 errcheck.o: errcheck.c myCSCI5229.h
 print.o: print.c myCSCI5229.h
 
-# scene dependencies
-candyCane.o: candyCane.h myCSCI5229.h
-snow.o: snow.c snow.h myCSCI5229.h
-scene0.o: scene0.c candyCane.h snow.h myCSCI5229.h
+# objects.a dependencies
+candyCane.o: candyCane.c objects.h myCSCI5229.h
+snow.o: snow.c objects.h myCSCI5229.h
+ball.0: ball.c objects.h myCSCI5229.h
 
-#  Create archive
+# scenes.a dependencies
+scene0.o: scene0.c objects.h myCSCI5229.h
+
+#  Create archives
 myCSCI5229.a:fatal.o errcheck.o print.o
-	ar -rcs $@ $^
-	
-scenes.a: candyCane.o snow.o scene0.o 
+	ar -rcs $@ $^	
+scenes.a: objects.a scene0.o 
+	ar -rcs $@ $^	
+objects.a: candyCane.o snow.o ball.o
 	ar -rcs $@ $^
 
 # Compile rules
@@ -52,7 +56,7 @@ scenes.a: candyCane.o snow.o scene0.o
 	g++ -c $(CFLG)  $<
 
 #  Link
-hw5:hw5.o scenes.a myCSCI5229.a
+hw5:hw5.o myCSCI5229.a scenes.a objects.a
 	gcc $(CFLG) -o $@ $^  $(LIBS)
 
 #  Clean

@@ -2,8 +2,7 @@
  * Author: John Salame
  * A file which contains object definitions for snow piles and (in the future) snowflakes
  */
-
-#include "snow.h"
+#include "objects.h"
 
 /*
  * The positive part of a 3D Cosine wave centered at (0, 0)

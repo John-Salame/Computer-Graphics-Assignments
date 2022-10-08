@@ -65,7 +65,7 @@
  * John Salame
  * CSCI 5229 Computer Graphics
  * Homework 5 - Lighting
- * Due 10/6/22
+ * Due 10/6/22, extended to Sun, 10/9/22
  * Revisions and work log:
  *   Version 0 Tues, 10/4/22
  *     Change mentions of HW4 to HW5
@@ -75,4 +75,9 @@
  *     I moved the light around and found that the snow piles are ok and the candy canes are the problem. It seems like I am lighting the opposite side.
  *   Version 3 Thurs, 10/6/22 (2:00 PM - 3:00 PM, 3:30 PM - 5:00 PM, 7:30 PM - 8:00 PM) = 3 hr
  *     Separate the logic into multiple files so I can easily switch scenes and have less clutter in my main file.
+ *   Version 4 Fri, 10/7/22 (8:00 AM - 8:30 AM, 3:00 PM - 4:00 PM, 5:00 PM - 9:30 PM) = 6 hr
+ *     Logic for changing scenes and controlling the light
+ *     Fixed the lighting on rotated objects (I had a bug because I never left the projection matrix in my Project() function)
+ *     Fixed the normal vectors on the candy cane hook segment (no longer flat shading)
+ *     Updated instructions on README
  */

@@ -2,8 +2,6 @@
  * Author: John Salame
  * Draw a scene with candy canes and an optional light
  */
-
-#include "myCSCI5229.h"
 #include "scenes.h"
 
 /*
@@ -15,11 +13,12 @@ void scene0(int light, float Position[4], int dim) {
   // store our view of the projection by pushing the matrix
   glPushMatrix();
 
-  // Draw a circle where the light will be. Draw it before lighting is enabled.
+  // If we want lighting, place a ball at the light and enable lighting.
+  glDisable(GL_LIGHTING);
   if(light) {
-    glDisable(GL_LIGHTING);
-    Circle(15, 1, Position[0], Position[1], Position[2]);
+    ball(Position[0], Position[1], Position[2], 0.5);
     glLightfv(GL_LIGHT0, GL_POSITION, Position);
+    // enable lighting
     glEnable(GL_LIGHTING);
   }
 
