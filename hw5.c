@@ -18,7 +18,7 @@ int th; // angle around y-axis
 int ph; // angle around x-axis
 // projection variables
 double dim; // width and height of the orthographic projection
-int mode = 2; // begin in first-person projection
+int mode; // begin in first-person projection
 int fov;
 double asp; // aspect ratio, used to keep the proportions of an object constant when resizing the windowa
 // first-person variables
@@ -41,6 +41,7 @@ int scene = 0; // choose which scene to render
 int numScenes = 3;
 int controlLight = 0; // when enabled, you can stop the light and move it around with arrow keys
 int pause = 0; // when enabled, stop the light
+int axes;
 
 // BEGIN UTILITY FUNCTIONS
 
@@ -52,6 +53,7 @@ void changeScene(int dir) {
 // Note: Implementation is tightly coupled to the global variables of the main script
 void initScene0() {
   // overrides for scene 0
+  mode = 2; // first-person perspective
   dim = 20.0;
   th = 55;
   ph = 20;
@@ -68,6 +70,8 @@ void initScene0() {
 // depends on "scene" global variable
 void init() {
   // defaults for every scene
+  mode = 0; // orthogonal
+  axes = 0; // do not display axes
   dim = 5.0;
   th = 0;
   ph = 0;
@@ -178,7 +182,7 @@ void display() {
   double Ez;
   // decide if it's day or night (for scene 0), then choose the background color
   lTh %= 360; // keep it in +/- 360 degrees 
-  if (lTh >= 0 && lTh < 180) {
+  if ((lTh >= 0 && lTh < 180) || lTh <= -180) {
     day = 1; //day
   }
   else {
@@ -220,10 +224,10 @@ void display() {
     default:
       Fatal("This mode should not exist: mode %d", mode);
   }
-  // disable lighting if it is on so we can correctly draw axes
+  // in case we want to draw anything like axes which do not need lighting
   glDisable(GL_LIGHTING);
-  displayAxes();
-
+  if (axes)
+    displayAxes();
   // now, start lighting settings and then draw objects
   // first, get rid of any left-over material properties from the state
   float zero[] = {0, 0, 0, 1.0}; // resets the material colors
@@ -384,6 +388,9 @@ void key(unsigned char ch,int x,int y) {
   // M: cycle to the next view mode (projection type)
   else if (ch == 'm' || ch == 'M')
     mode = (mode + 1) % 3;
+  // X: toggle axes
+  else if (ch == 'x' || ch == 'X')
+    axes = !axes;
   // L: toggle the light
   else if (ch == 'l' || ch == 'L')
     light = !light;

@@ -44,7 +44,7 @@ scene0.o: scene0.c objects.h myCSCI5229.h
 #  Create archives
 myCSCI5229.a:fatal.o errcheck.o print.o
 	ar -rcs $@ $^	
-scenes.a: objects.a scene0.o 
+scenes.a: scene0.o objects.a 
 	ar -rcs $@ $^	
 objects.a: candyCane.o snow.o ball.o
 	ar -rcs $@ $^
@@ -56,7 +56,7 @@ objects.a: candyCane.o snow.o ball.o
 	g++ -c $(CFLG)  $<
 
 #  Link
-hw5:hw5.o myCSCI5229.a scenes.a objects.a
+hw5:hw5.o scenes.a objects.a myCSCI5229.a 
 	gcc $(CFLG) -o $@ $^  $(LIBS)
 
 #  Clean

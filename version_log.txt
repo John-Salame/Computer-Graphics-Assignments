@@ -83,4 +83,10 @@
  *   Version 5 Fri, 10/7/22 (11:00 PM - 1:45 AM) = 2.75 hr
  *     Added day and night cycle to scene 0.
  *     Also, lots of fine-tuning and choosing a good initial position to watch the sunrise and sunset.
+ *   Version 6 Sun, 10/9/22 (12:30 PM) = 0 hr
+ *     Fix compilation on Mac (fixed a linking error with the ordering of the files).
+ *     Fixed day/night bug when rewinding time at night (it wasn't switching to day).
+ *     Added option to enable or disable axes.
+ *     Removed axes by default so the scene looks nicer.
+ *     Put yourself in orthogonal mode when viewing singular objects. 
  */

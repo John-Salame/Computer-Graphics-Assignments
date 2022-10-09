@@ -15,6 +15,7 @@ Change the scene by holding CTRL and using the arrow keys. Press M to change pro
 * Press C or 'o' to enter "Control Light" mode. In this mode, the light will pause and you can move the light with the arrow keys (UP/DOWN/LEFT/RIGHT).
 * Press CTRL + Arrow Keys to change the scene.
 * Press L to enable or disable lighting.
+* Press X to toggle axes.
 * Press M (M for mode) to change from Orthogonal to Perspective to First Person.
 * Press 0 (zero) to reset the scene.
 * First-Person Perspective: Move with WASD (W=forward, A=left, S=down, D=right).
