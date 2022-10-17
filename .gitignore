@@ -1,3 +1,8 @@
-*.o
+# ignore gvim swp viles
 *.swp
+# ignore compilation targets
+*.o
+*.a
+# ignore the compiled binary
 hw?
+

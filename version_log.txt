@@ -32,7 +32,7 @@
  */
 
 /*
-John Salame
+ * John Salame
  * CSCI 5229 Computer Graphics
  * Homework 4 - Projections
  * Due 10/2/22 (originally due 9/29/22)
@@ -59,4 +59,34 @@ John Salame
  *     Started implementing snow mound
  *   Version 8 Sun, 10/2/22 8:15 PM - 9:45 PM = 1.5 hr
  *     I finalized my scene and took a nice screenshot!
+ */
+
+/*
+ * John Salame
+ * CSCI 5229 Computer Graphics
+ * Homework 5 - Lighting
+ * Due 10/6/22, extended to Sun, 10/9/22
+ * Revisions and work log:
+ *   Version 0 Tues, 10/4/22
+ *     Change mentions of HW4 to HW5
+ *   Version 1 Wed, 10/5/22 3 hr
+ *     Calculated all my normals, but the lighting does not work (it is always showing on the same side of the prefab, as if the light is always the same position relative to every object as I create it (instead of sitting in a global position).
+ *   Version 2 Thurs, 10/6/22 (11:00 AM - 2:00 PM) = 3 hr
+ *     I moved the light around and found that the snow piles are ok and the candy canes are the problem. It seems like I am lighting the opposite side.
+ *   Version 3 Thurs, 10/6/22 (2:00 PM - 3:00 PM, 3:30 PM - 5:00 PM, 7:30 PM - 8:00 PM) = 3 hr
+ *     Separate the logic into multiple files so I can easily switch scenes and have less clutter in my main file.
+ *   Version 4 Fri, 10/7/22 (8:00 AM - 8:30 AM, 3:00 PM - 4:00 PM, 5:00 PM - 9:30 PM) = 6 hr
+ *     Logic for changing scenes and controlling the light
+ *     Fixed the lighting on rotated objects (I had a bug because I never left the projection matrix in my Project() function)
+ *     Fixed the normal vectors on the candy cane hook segment (no longer flat shading)
+ *     Updated instructions on README
+ *   Version 5 Fri, 10/7/22 (11:00 PM - 1:45 AM) = 2.75 hr
+ *     Added day and night cycle to scene 0.
+ *     Also, lots of fine-tuning and choosing a good initial position to watch the sunrise and sunset.
+ *   Version 6 Sun, 10/9/22 (12:30 PM) = 0 hr
+ *     Fix compilation on Mac (fixed a linking error with the ordering of the files).
+ *     Fixed day/night bug when rewinding time at night (it wasn't switching to day).
+ *     Added option to enable or disable axes.
+ *     Removed axes by default so the scene looks nicer.
+ *     Put yourself in orthogonal mode when viewing singular objects. 
  */

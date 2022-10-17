@@ -1,5 +1,6 @@
-# HW4
-EXE=hw4
+# HW5
+EXE=hw5
+SCENE_DEPS=myCSCI5229.h objects.h scenes.h
 
 # Main target
 all: $(EXE)
@@ -24,6 +25,30 @@ endif
 CLEAN=rm -f $(EXE) *.o *.a
 endif
 
+# Main file dependencies
+hw5.o: hw5.c $(SCENE_DEPS)
+
+# myCSCI5229.a dependencies
+fatal.o: fatal.c myCSCI5229.h
+errcheck.o: errcheck.c myCSCI5229.h
+print.o: print.c myCSCI5229.h
+
+# objects.a dependencies
+candyCane.o: candyCane.c objects.h myCSCI5229.h
+snow.o: snow.c objects.h myCSCI5229.h
+ball.0: ball.c objects.h myCSCI5229.h
+
+# scenes.a dependencies
+scene0.o: scene0.c objects.h myCSCI5229.h
+
+#  Create archives
+myCSCI5229.a:fatal.o errcheck.o print.o
+	ar -rcs $@ $^	
+scenes.a: scene0.o objects.a 
+	ar -rcs $@ $^	
+objects.a: candyCane.o snow.o ball.o
+	ar -rcs $@ $^
+
 # Compile rules
 .c.o:
 	gcc -c $(CFLG)  $<
@@ -31,7 +56,7 @@ endif
 	g++ -c $(CFLG)  $<
 
 #  Link
-hw4:hw4.o  
+hw5:hw5.o scenes.a objects.a myCSCI5229.a 
 	gcc $(CFLG) -o $@ $^  $(LIBS)
 
 #  Clean
