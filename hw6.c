@@ -1,12 +1,16 @@
 /*
  * John Salame
  * CSCI 5229 Computer Graphics
- * Homework 5 - Lighting
- * Due 10/6/22
+ * Homework 6 - Textures
+ * Due 10/13/22, extended to 10/17/22
  */
 
+// Includes
 #include "myCSCI5229.h" // OpenGL and some helper functions come from here
 #include "scenes.h" // also includes individual objects we can draw
+
+// Macros
+#define NUM_TEX 4 // number of textures
 
 // Forward declarations
 void updateFpVecs();
@@ -42,6 +46,11 @@ int numScenes = 3;
 int controlLight = 0; // when enabled, you can stop the light and move it around with arrow keys
 int pause = 0; // when enabled, stop the light
 int axes;
+// texture settings
+int useTexture; // flag whether texture is enabled (1) or diabled (0); set in init()
+unsigned int texture[NUM_TEX];  //  Texture names
+int ntex = 0; // which index of texture array we're using
+
 
 // BEGIN UTILITY FUNCTIONS
 
@@ -86,6 +95,7 @@ void init() {
   light = 1;
   lTh = 0;
   lZ = 0;
+  useTexture = 1;
   switch(scene) {
     case 0:
       initScene0();
@@ -223,11 +233,19 @@ void display() {
       break;
     default:
       Fatal("This mode should not exist: mode %d", mode);
-  }
-  // in case we want to draw anything like axes which do not need lighting
+  } 
+
+  // in case we want to draw anything like axes which do not need lighting or textures
   glDisable(GL_LIGHTING);
+  glDisable(GL_TEXTURE_2D);
   if (axes)
     displayAxes();
+
+  // start texture settings
+  if (useTexture) {
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvi(GL_TEXTURE_ENV , GL_TEXTURE_ENV_MODE , GL_MODULATE); //GL_MODULATE
+  }
   // now, start lighting settings and then draw objects
   // first, get rid of any left-over material properties from the state
   float zero[] = {0, 0, 0, 1.0}; // resets the material colors
@@ -279,7 +297,7 @@ void display() {
   // AT THIS POINT, LIGHT0 HAS NO POSITION! HANDLE THAT IN THE SCENE YOU DRAW.
   if(scene == 0) {
     // Create the objects in the scene
-    scene0(dim, light, l0Position, l1Position, day);
+    scene0(dim, light, l0Position, l1Position, day, texture);
   }
   // display one of the simple scenes with a light rotating around an object
   else {
@@ -294,10 +312,12 @@ void display() {
       glEnable(GL_LIGHTING);
     }
     // now choose object based on scene
-    if (scene == 1)
-      CandyCane(0.5, 1.0, 1.0, 180);
-    else if (scene == 2)
-      threeDCos(); // snow pile
+    if (scene == 1) {
+      CandyCane(0.5, 1.0, 1.0, 180, texture[3]);
+    }
+    else if (scene == 2) {
+      threeDCos(texture[2]); // snow pile using snow3.bmp texture
+    }
     glPopMatrix();
   } 
 
@@ -394,6 +414,8 @@ void key(unsigned char ch,int x,int y) {
   // L: toggle the light
   else if (ch == 'l' || ch == 'L')
     light = !light;
+  else if (ch == 't' || ch == 'T')
+    useTexture = !useTexture;
   // C or O: control the light (stop the light from moving and allow you to move the light using arrow keys)
   else if (ch == 'c' || ch == 'C' || ch == 'o' || ch == 'O') {
     controlLight = !controlLight;
@@ -478,7 +500,7 @@ int main(int argc, char** argv) {
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
   glutInitWindowSize(600, 400);
-  glutCreateWindow("John Salame HW5: Lighting");
+  glutCreateWindow("John Salame HW6: Textures");
 #ifdef USEGLEW
   //  Initialize GLEW
   if (glewInit()!=GLEW_OK) Fatal("Error initializing GLEW\n");
@@ -490,7 +512,12 @@ int main(int argc, char** argv) {
   glutIdleFunc(idle);
   glutReshapeFunc(reshape);
   // Enable Z-buffer depth test
-  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_DEPTH_TEST); 
+  // Load textures
+  texture[0] = LoadTexBMP("snow.bmp");
+  texture[1] = LoadTexBMP("snow2.bmp");
+  texture[2] = LoadTexBMP("snow3.bmp");
+  texture[3] = LoadTexBMP("candyCane.bmp");
   // Finally, allow the window to draw
   ErrCheck("init");
   glutMainLoop();

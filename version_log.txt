@@ -90,3 +90,14 @@
  *     Removed axes by default so the scene looks nicer.
  *     Put yourself in orthogonal mode when viewing singular objects. 
  */
+
+/*
+ * John Salame
+ * CSCI 5229 Computer Graphics
+ * Homework 6 - Textures
+ * Due 10/13/22, extended to Mon, 10/17/22
+ * Revisions and work log:
+ *   Version 1 Mon, 12:00 PM - 6:30 PM ? (4 to 6 hours of work)
+ *     Created textures for snow and for the end of the candy cane.
+ *     I created the textures in GIMP since I could not find any good textures in bmp format.
+ */

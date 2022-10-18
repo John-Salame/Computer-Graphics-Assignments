@@ -1,7 +1,12 @@
-# Homework 5: Lighting
+# Homework 6: Textures
 John Salame
 CSCI 5229
-Due 10/6/22
+Due 10/13/22, extended to Mon, 10/17/22
+
+## Textures
+I created some textures in GIMP. I have a few textures for snow to try out, which are all slightly different. Currently, only snow.bmp and snow3.bmp are in use.  
+I did not put textures on the main part of the candy cane because it looked awful on top of the glossy look of the candy cane. My idea was to add the illusion of depth, but that is not possible unless the candy cane can lose its shine on the damaged parts or machine cut marks. This is not possible with lighting settings that are uniform across the candy cane like I currently have.  
+Press T to toggle textures.
 
 ## Day and Night
 Scene 0 features a day and night cycle. Let it run on its own, or press C or O to control the sun/moon.
