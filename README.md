@@ -28,7 +28,5 @@ Change the scene by holding CTRL and using the arrow keys. Press M to change pro
 * Overhead Orthogonal or Overhead Perspective: Spin the scene with the arrow keys.
 
 ## Time taken
-I took 17.75 hours to complete the assignment.  
-Quite a bit went into debugging my error with lighting rotated objects (it turns out I had an indentation error in my Project function and I never left the Project matrix mode, which somehow caused the light to be at the same coordinates relative to the transform for EVERY vertex I drew instead of taking a global position).  
-A lot of time went into fine-tuning the look as well. I think it turned out pretty well. There aren't many objects, but my focus was more on trying out different combinations of ambient, diffuse, and specular lighting.
+I estimate that assignment 6 took 5 to 6 hours to complete. The most frustrating part was the grass texture, which was a ridiculously large image when I brought it in and I had trouble cropping it and scaling it to what I want. It doesn't look very good in the daytime, but it looks ok at night.
 

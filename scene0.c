@@ -47,15 +47,21 @@ void scene0(int dim, int light, float l0Position[4], float l1Position[4], int da
   else
     baseGreen = nightGreen;
   glColor4fv(baseGreen);
+  // lighting materials
+  glBindTexture(GL_TEXTURE_2D, texture[4]); // grass texture
   glMaterialfv(GL_FRONT, GL_AMBIENT, baseGreen);
   glMaterialfv(GL_FRONT, GL_DIFFUSE, baseGreen);
+  // texture settings
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
   glNormal3f(0, 1, 0); // the normal vector of the ground is up
   glBegin(GL_QUADS);
-  glVertex3f(0.8*dim, 0, 0.8*dim); //make sure to have CCW winding
-  glVertex3f(0.8*dim, 0, -0.8*dim);
-  glVertex3f(-0.8*dim, 0, -0.8*dim);
-  glVertex3f(-0.8*dim, 0, 0.8*dim);
+  glTexCoord2f(10, 10); glVertex3f(0.8*dim, 0, 0.8*dim); //make sure to have CCW winding
+  glTexCoord2f(10, 0); glVertex3f(0.8*dim, 0, -0.8*dim);
+  glTexCoord2f(0, 0); glVertex3f(-0.8*dim, 0, -0.8*dim);
+  glTexCoord2f(0, 10); glVertex3f(-0.8*dim, 0, 0.8*dim);
   glEnd();
+  // done creating base plate (grass)
   // place some candy canes
   CandyCane(0.8, 4.0, 1.5, 180, texture[3]);
   glTranslatef(2.0, -1.0, 2.0); // offset from the previous candy cane

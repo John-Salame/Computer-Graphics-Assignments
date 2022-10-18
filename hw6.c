@@ -10,7 +10,7 @@
 #include "scenes.h" // also includes individual objects we can draw
 
 // Macros
-#define NUM_TEX 4 // number of textures
+#define NUM_TEX 5 // number of textures
 
 // Forward declarations
 void updateFpVecs();
@@ -518,6 +518,7 @@ int main(int argc, char** argv) {
   texture[1] = LoadTexBMP("snow2.bmp");
   texture[2] = LoadTexBMP("snow3.bmp");
   texture[3] = LoadTexBMP("candyCane.bmp");
+  texture[4] = LoadTexBMP("grass.bmp"); //Attribution: <a href="https://www.freepik.com/free-photo/green-grass-field-background_991898.htm#&position=0&from_view=author">Image by awesomecontent</a> on Freepik
   // Finally, allow the window to draw
   ErrCheck("init");
   glutMainLoop();

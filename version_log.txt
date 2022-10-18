@@ -100,4 +100,6 @@
  *   Version 1 Mon, 12:00 PM - 6:30 PM ? (4 to 6 hours of work)
  *     Created textures for snow and for the end of the candy cane.
  *     I created the textures in GIMP since I could not find any good textures in bmp format.
+ *   Version 2 Tues, 9:30 AM - 10:30 AM = 1 hr
+ *     Add grass texture and resubmit
  */
