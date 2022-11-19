@@ -8,8 +8,14 @@
  * The positive part of a 3D Cosine wave centered at (0, 0)
  * Equation: y = 0.5*Cos(180*x)+0.5*Cos(180*z)-0.5, domain x e [-0.5, 0.5], z e [-0.5, 0.5]
  * Good for making mounds of snow
+ * @param unsigned int texName: The name of the texture to use
  */
-void threeDCos() {
+void threeDCos(unsigned int texName) {
+  // prepare texture
+  glBindTexture(GL_TEXTURE_2D, texName);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT); // only reflect in the vertical direction (z on the snow pile)
+  const int reps = 2; // texture repetitions
   const double min = -0.5;
   // we do not need a variable for it, but the max is 0.5
   const int interval = 15; // angular interval
@@ -30,11 +36,15 @@ void threeDCos() {
     glBegin(GL_QUAD_STRIP);
     // a is the x position
     for(int a = -90; a <= 90; a += interval) {
+      // point 1
       // the normal is the gradient of the function, where the function value is y
       glNormal3f(0.5*3.14159*Sin(a), 1.0, 0.5*3.14159*Sin(b));
+      glTexCoord2f(reps*(xLoc+0.5), reps*(zLoc+0.5));
       glVertex3f(xLoc, 0.5*Cos(b)+0.5*Cos(a)-0.5, zLoc);
+      // point 2
       // without this normal, the mound appears to have flat shading even when the mode is smooth shading
       glNormal3f(0.5*3.14159*Sin(a), 1.0, 0.5*3.14159*Sin(b+interval));
+      glTexCoord2f(reps*(xLoc+0.5), reps*(zLoc+cartInterval+0.5));
       glVertex3f(xLoc, 0.5*Cos(b+interval)+0.5*Cos(a)-0.5, zLoc+cartInterval); // the next row of z
       xLoc += cartInterval;
     }

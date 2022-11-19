@@ -14,8 +14,10 @@ void Circle(float circlePrecision, float r, float ox, float oy, float oz) {
   glMaterialfv(GL_FRONT, GL_SPECULAR, zero);
   glNormal3f(0, 0, -1); // normal is just the front plane's normal, which is z for this circle
   glBegin(GL_TRIANGLE_FAN);
+  glTexCoord2f(0.5, 0.5);
   glVertex3f(ox, oy, oz); // center of triangle fan
   for(int i=0; i<=360; i+=circlePrecision) {
+    glTexCoord2f(0.5*(1+Sin(i)), 0.5*(1-Cos(i)));
     glVertex3f(ox+r*Cos(i), oy+r*Sin(i), oz);
   }
   glEnd();
@@ -24,16 +26,15 @@ void Circle(float circlePrecision, float r, float ox, float oy, float oz) {
 
 /* Helper function for candy cane, makes a cylinder wall with radius crossRad and height straightHeight */
 void RedStripedCylinderWall(int circlePrecision, float crossRad, float straightHeight) {
-  float quadHeight = straightHeight / 5.0; // split the cylinder length-wise into multiple quads so lighting works close-up
+  glPushMatrix();
+  glScalef(crossRad, crossRad, straightHeight);
+  float quadHeight = 0.2; // split the cylinder length-wise into multiple quads so lighting works close-up
   float nonRed = 1.0; // 1.0 when white stripe, 0.0 when red stripe
   float myColor[4];
   myColor[0] = 1.0;
   myColor[3] = 1.0;
-  // set the specular material
-  //float light_gray[] = {0.2, 0.2, 0.2, 1.0};
-  //glMaterialfv(GL_FRONT, GL_SPECULAR, light_gray);
   // draw the object
-  for(float j=0; j<straightHeight; j+=quadHeight) {
+  for(float j=0; j<1.0; j+=quadHeight) {
     nonRed = 1.0; // prevent a bug that misaligned the stripes on the next layer of quads
     glBegin(GL_QUAD_STRIP);
     for(int i=0; i<=360; i+=circlePrecision) {
@@ -42,12 +43,13 @@ void RedStripedCylinderWall(int circlePrecision, float crossRad, float straightH
       nonRed = !nonRed; // binary flip from 0 to 1 or 1 to 0
       glMaterialfv(GL_FRONT, GL_AMBIENT, myColor);
       glMaterialfv(GL_FRONT, GL_DIFFUSE, myColor);
-      glNormal3f(Cos(i), Sin(i), 0); // here, the normal vector is along the radius
-      glVertex3f(crossRad*Cos(i), crossRad*Sin(i), j);
-      glVertex3f(crossRad*Cos(i), crossRad*Sin(i), j+quadHeight);
+      glNormal3f(Cos(i), Sin(i), 0); // here, the normal vector is along the radius; normal is same for both vertices
+      glVertex3f(Cos(i), Sin(i), j);
+      glVertex3f(Cos(i), Sin(i), j+quadHeight);
     }
     glEnd();
   }
+  glPopMatrix();
 }
 
 /* 
@@ -62,9 +64,6 @@ void RedStripedHookSegment(int circlePrecision, float crossRad, float hookRad) {
   float myColor[4];
   myColor[0] = 1.0;
   myColor[3] = 1.0;
-  // set the specular material
-  //float light_gray[] = {0.2, 0.2, 0.2, 1.0};
-  //glMaterialfv(GL_FRONT, GL_SPECULAR, light_gray);
   // prepare the calculations and draw the object
   int hookDeg = circlePrecision;
   float secantAngle = (float) hookDeg/2; // x in the image hookProof.JPG
@@ -106,10 +105,15 @@ void RedStripedHookSegment(int circlePrecision, float crossRad, float hookRad) {
  * @param float straightHeight - height of the tall straight part before the hook
  * @param float hookRad - the radius of the curve that makes the hook
  * @param float hookDeg - the length of the hook's sweep path in degrees (180 would make a half-circle)
+ * @param unsigned int texName - name of the texture to use on the ends of the candy cane; I don't have texture on the main part because it looks terrible with the glossy look of the candy cane.
  */
-void CandyCane(float crossRad, float straightHeight, float hookRad, int hookDeg) {
+void CandyCane(float crossRad, float straightHeight, float hookRad, int hookDeg, unsigned int texName) {
   glPushMatrix();
   glRotatef(-90, 1.0, 0, 0); // make it so y is up for the candy cane instead of z. I have this because I initially thought z was pointing up.
+  // prepare texture
+  glBindTexture(GL_TEXTURE_2D, texName);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   int i = 0; // for the loop
   int circlePrecision = 15; // degrees per rectangle making up a cylinder
   // First, make a circle at the base of the candy cane
