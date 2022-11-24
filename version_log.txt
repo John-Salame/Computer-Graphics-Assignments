@@ -111,6 +111,7 @@
  * Due Tues, 12/6/22
  * Revisions and work log:
  *   Reading and preparation: 10 - 20 hours
- *   Version 0 Wed. 11/23/22 8:00 PM
+ *   Version 0 Wed. 11/23/22 8:00 PM - 9:00 PM
  *     Fix the names of things to say Final Project
+ *     Begin making the normal map creator in Python
  */
