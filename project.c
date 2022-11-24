@@ -1,8 +1,8 @@
 /*
  * John Salame
  * CSCI 5229 Computer Graphics
- * Homework 6 - Textures
- * Due 10/13/22, extended to 10/17/22
+ * Final Project
+ * Due 12/6/22
  */
 
 // Includes
@@ -500,7 +500,7 @@ int main(int argc, char** argv) {
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
   glutInitWindowSize(600, 400);
-  glutCreateWindow("John Salame HW6: Textures");
+  glutCreateWindow("John Salame Final Project");
 #ifdef USEGLEW
   //  Initialize GLEW
   if (glewInit()!=GLEW_OK) Fatal("Error initializing GLEW\n");

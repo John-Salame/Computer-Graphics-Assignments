@@ -1,5 +1,5 @@
-# HW6
-EXE=hw6
+# project
+EXE=project
 SCENE_DEPS=myCSCI5229.h objects.h scenes.h
 OBJECTS=candyCane.o snow.o ball.o
 
@@ -27,7 +27,7 @@ CLEAN=rm -f $(EXE) *.o *.a
 endif
 
 # Main file dependencies
-hw6.o: hw6.c $(SCENE_DEPS)
+project.o: project.c $(SCENE_DEPS)
 
 # myCSCI5229.a dependencies
 fatal.o: fatal.c myCSCI5229.h
@@ -54,7 +54,7 @@ myCSCI5229.a:fatal.o errcheck.o print.o loadtexbmp.o
 	g++ -c $(CFLG)  $<
 
 #  Link
-hw6:hw6.o scene0.o $(OBJECTS) myCSCI5229.a 
+project:project.o scene0.o $(OBJECTS) myCSCI5229.a 
 	gcc $(CFLG) -o $@ $^  $(LIBS)
 
 #  Clean

@@ -103,3 +103,14 @@
  *   Version 2 Tues, 9:30 AM - 10:30 AM = 1 hr
  *     Add grass texture and resubmit
  */
+
+/*
+ * John Salame
+ * CSCI 5229 Computer Graphics
+ * Final Project
+ * Due Tues, 12/6/22
+ * Revisions and work log:
+ *   Reading and preparation: 10 - 20 hours
+ *   Version 0 Wed. 11/23/22 8:00 PM
+ *     Fix the names of things to say Final Project
+ */

@@ -28,5 +28,4 @@ Change the scene by holding CTRL and using the arrow keys. Press M to change pro
 * Overhead Orthogonal or Overhead Perspective: Spin the scene with the arrow keys.
 
 ## Time taken
-I estimate that assignment 6 took 5 to 6 hours to complete. The most frustrating part was the grass texture, which was a ridiculously large image when I brought it in and I had trouble cropping it and scaling it to what I want. It doesn't look very good in the daytime, but it looks ok at night.
 
