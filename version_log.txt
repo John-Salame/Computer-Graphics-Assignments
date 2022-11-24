@@ -111,7 +111,11 @@
  * Due Tues, 12/6/22
  * Revisions and work log:
  *   Reading and preparation: 10 - 20 hours
- *   Version 0 Wed. 11/23/22 8:00 PM - 9:00 PM
+ *   Version 0 Wed. 11/23/22 8:00 PM - 9:00 PM (1 hr)
  *     Fix the names of things to say Final Project
  *     Begin making the normal map creator in Python
+ *   Version 1 Wed. 11/23/22 9:00 PM - Thurs 11/24/22 1:00 AM (4 hr)
+ *     I created a script to produce a normal map for an image.
+ *     So far, it only creates the X component of the normal map.
+ *     The Y component is 128, and the Z component is 255.
  */
