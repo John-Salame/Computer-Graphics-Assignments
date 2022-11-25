@@ -11,7 +11,7 @@
  */
 void ball(double x,double y,double z,double r)
 {
-  int inc = 30;
+  int inc = 15;
   // Save transformation
   glPushMatrix();
   // Offset, scale and rotate
@@ -25,8 +25,8 @@ void ball(double x,double y,double z,double r)
     glBegin(GL_QUAD_STRIP);
     for (int th=0;th<=360;th+=2*inc)
     {
-      Vertex(th,ph);
       Vertex(th,ph+inc);
+      Vertex(th,ph);
     }
     glEnd();
   }

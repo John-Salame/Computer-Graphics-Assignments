@@ -118,4 +118,10 @@
  *     I created a script to produce a normal map for an image.
  *     So far, it only creates the X component of the normal map.
  *     The Y component is 128, and the Z component is 255.
+ *   Version 2 (5.75 hr)
+ *     Thurs. 11/24/22 11:00 AM - 12:30 PM = 1.5 hr Study Example 25
+ *     Thurs. 11/24/22 1:30 PM - 3:15 PM = 1.75 hr Fix Winding
+ *       Still unsure if the winding on the ball is correct. I might just disable culling when I draw it.
+ *     Fri. 11/25/22 7:40 AM - 9:40 AM = 2 hr attempt to mimic standard pipeline with two LightPos
+ *     Fri. 11/25/22 11:00 AM - 11:30 AM = 0.5 hr - Shader imitating standard pipeline works!
  */

@@ -12,7 +12,7 @@ void Circle(float circlePrecision, float r, float ox, float oy, float oz) {
   glMaterialfv(GL_FRONT, GL_AMBIENT, white);
   glMaterialfv(GL_FRONT, GL_DIFFUSE, white);
   glMaterialfv(GL_FRONT, GL_SPECULAR, zero);
-  glNormal3f(0, 0, -1); // normal is just the front plane's normal, which is z for this circle
+  glNormal3f(0, 0, 1); // normal is just the front plane's normal, which is z for this circle
   glBegin(GL_TRIANGLE_FAN);
   glTexCoord2f(0.5, 0.5);
   glVertex3f(ox, oy, oz); // center of triangle fan
@@ -44,8 +44,8 @@ void RedStripedCylinderWall(int circlePrecision, float crossRad, float straightH
       glMaterialfv(GL_FRONT, GL_AMBIENT, myColor);
       glMaterialfv(GL_FRONT, GL_DIFFUSE, myColor);
       glNormal3f(Cos(i), Sin(i), 0); // here, the normal vector is along the radius; normal is same for both vertices
-      glVertex3f(Cos(i), Sin(i), j);
       glVertex3f(Cos(i), Sin(i), j+quadHeight);
+      glVertex3f(Cos(i), Sin(i), j);
     }
     glEnd();
   }
@@ -79,9 +79,8 @@ void RedStripedHookSegment(int circlePrecision, float crossRad, float hookRad) {
     // start creating the shape
     float x = crossRad*Cos(i);
     float radius = hookRad-x;
-    // The x value of the vertex is x-hookRad, which is the same as -1*radius
-    glNormal3f(Cos(i), Sin(i), 0); // here, the normal vector is along the radius
-    glVertex3f(-radius, crossRad*Sin(i), 0);
+    // The ordering of the points is counter-clockwise. That means we draw the more complicated point first.
+    
     // Here we explain what is shown in my proof, hookProof.JPG
     // The "top" of the "cylinder" is found by following the secant line from the current hook segment to the start of the next hook segment.
     // The equation to do this is 2*hookRad*sin(hookDeg/2) and the direction of the secant line is the tangent line rotated by (hookDeg/2).
@@ -92,8 +91,12 @@ void RedStripedHookSegment(int circlePrecision, float crossRad, float hookRad) {
     float secantLength = 2*radius*Sin(secantAngle);
     // rotate the normal vector by hookDeg along the y-axis
     //   x=x_old*cos(rot_angle), y=y_old, z=x_old*sin(rot_angle)
+    // The x value x-old is x-hookRad, which is the same as -1*radius
     glNormal3f(Cos(i)*Cos(hookDeg), Sin(i), -Cos(i)*Sin(hookDeg)); 
     glVertex3f(-radius+secantLength*Sin(secantAngle), crossRad*Sin(i), secantLength*Cos(secantAngle));
+
+    glNormal3f(Cos(i), Sin(i), 0); // here, the normal vector is along the radius
+    glVertex3f(-radius, crossRad*Sin(i), 0);
   }
   glEnd();
   glPopMatrix();
@@ -117,7 +120,11 @@ void CandyCane(float crossRad, float straightHeight, float hookRad, int hookDeg,
   int i = 0; // for the loop
   int circlePrecision = 15; // degrees per rectangle making up a cylinder
   // First, make a circle at the base of the candy cane
+  // make sure the bottom of the circle is down
+  glPushMatrix();
+  glRotatef(180, 1.0, 0, 0);
   Circle(circlePrecision, crossRad, 0, 0, 0);
+  glPopMatrix();
   // Now, make the tall straight cylinder
   RedStripedCylinderWall(circlePrecision, crossRad, straightHeight);
   // Now, make the hook
@@ -127,8 +134,6 @@ void CandyCane(float crossRad, float straightHeight, float hookRad, int hookDeg,
     glRotatef(circlePrecision, 0, 1.0, 0);
     //glRotatef(circlePrecision, 0, 1.0, 0); // rotate the curve origin so the next segment starts at the end of the previous segment
   }
-  // make sure the bottom of the circle is down
-  glRotatef(180, 1.0, 0, 0);
   Circle(circlePrecision, crossRad, -hookRad, 0, 0);
   glPopMatrix();
   ErrCheck("candy cane");

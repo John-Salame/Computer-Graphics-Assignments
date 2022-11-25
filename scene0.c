@@ -56,10 +56,10 @@ void scene0(int dim, int light, float l0Position[4], float l1Position[4], int da
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
   glNormal3f(0, 1, 0); // the normal vector of the ground is up
   glBegin(GL_QUADS);
-  glTexCoord2f(10, 10); glVertex3f(0.8*dim, 0, 0.8*dim); //make sure to have CCW winding
-  glTexCoord2f(10, 0); glVertex3f(0.8*dim, 0, -0.8*dim);
   glTexCoord2f(0, 0); glVertex3f(-0.8*dim, 0, -0.8*dim);
   glTexCoord2f(0, 10); glVertex3f(-0.8*dim, 0, 0.8*dim);
+  glTexCoord2f(10, 10); glVertex3f(0.8*dim, 0, 0.8*dim); //make sure to have CCW winding
+  glTexCoord2f(10, 0); glVertex3f(0.8*dim, 0, -0.8*dim);
   glEnd();
   // done creating base plate (grass)
   // place some candy canes

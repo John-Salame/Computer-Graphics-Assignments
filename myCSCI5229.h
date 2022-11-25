@@ -65,6 +65,13 @@ unsigned int LoadTexBMP(const char* file);
 void ErrCheck(const char* where);
 //int  LoadOBJ(const char* file);
 
+// stuff related to loading in shader programs
+char* ReadText(char *file);
+void PrintShaderLog(int obj,char* file);
+void PrintProgramLog(int obj);
+int CreateShader(GLenum type,char* file);
+int CreateShaderProg(char* VertFile,char* FragFile);
+
 #ifdef __cplusplus
 }
 #endif

@@ -4,5 +4,5 @@
 *.o
 *.a
 # ignore the compiled binary
-hw?
+/project
 

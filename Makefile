@@ -34,6 +34,7 @@ fatal.o: fatal.c myCSCI5229.h
 errcheck.o: errcheck.c myCSCI5229.h
 print.o: print.c myCSCI5229.h
 loadtexbmp.o: loadtexbmp.c myCSCI5229.h
+loadProgram.o: loadProgram.c myCSCI5229.h
 
 # objects.a dependencies
 candyCane.o: candyCane.c objects.h myCSCI5229.h
@@ -44,7 +45,7 @@ ball.0: ball.c objects.h myCSCI5229.h
 scene0.o: scene0.c objects.h myCSCI5229.h
 
 #  Create archives
-myCSCI5229.a:fatal.o errcheck.o print.o loadtexbmp.o
+myCSCI5229.a:fatal.o errcheck.o print.o loadtexbmp.o loadProgram.o
 	ar -rcs $@ $^	
 
 # Compile rules

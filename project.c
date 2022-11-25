@@ -11,6 +11,7 @@
 
 // Macros
 #define NUM_TEX 5 // number of textures
+#define NUM_PROGS 1 // number of shader programs
 
 // Forward declarations
 void updateFpVecs();
@@ -50,6 +51,8 @@ int axes;
 int useTexture; // flag whether texture is enabled (1) or diabled (0); set in init()
 unsigned int texture[NUM_TEX];  //  Texture names
 int ntex = 0; // which index of texture array we're using
+// shaders
+unsigned int shaders[NUM_PROGS];
 
 
 // BEGIN UTILITY FUNCTIONS
@@ -208,6 +211,7 @@ void display() {
   // clear the buffers and apply the background color
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glLoadIdentity();
+  glEnable(GL_CULL_FACE);
   // set the view angle or first-person perspective view
   switch(mode) {
     // Orthogonal Overhead
@@ -238,8 +242,11 @@ void display() {
   // in case we want to draw anything like axes which do not need lighting or textures
   glDisable(GL_LIGHTING);
   glDisable(GL_TEXTURE_2D);
+  glUseProgram(0); // for drawing axes
   if (axes)
     displayAxes();
+
+  glUseProgram(shaders[0]); // use the shader program that mimics the pipeline
 
   // start texture settings
   if (useTexture) {
@@ -252,6 +259,15 @@ void display() {
   glMaterialfv(GL_FRONT, GL_AMBIENT, zero);
   glMaterialfv(GL_FRONT, GL_DIFFUSE, zero);
   glMaterialfv(GL_FRONT, GL_SPECULAR, zero);
+
+  // set the lights to zero so the shader will not add color from lights that are disabled
+  glLightfv(GL_LIGHT0, GL_AMBIENT, zero);
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, zero);
+  glLightfv(GL_LIGHT0, GL_SPECULAR, zero);
+  glLightfv(GL_LIGHT1, GL_AMBIENT, zero);
+  glLightfv(GL_LIGHT1, GL_DIFFUSE, zero);
+  glLightfv(GL_LIGHT1, GL_SPECULAR, zero);
+
   // determine if it is night or day (currently only matters for scene 0)
   // set night light properties
   if(scene == 0 && day == 0) {
@@ -284,13 +300,22 @@ void display() {
   glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 0);
   glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
   glEnable(GL_COLOR_MATERIAL); // without this enabled, the glColor4fv does not apply, but the materials do
+  
   // set the intenisty and color of each type of lighting for lights 0 and 1
-  glLightfv(GL_LIGHT0, GL_AMBIENT, Ambient);
-  glLightfv(GL_LIGHT0, GL_DIFFUSE, Diffuse);
-  glLightfv(GL_LIGHT0, GL_SPECULAR, Specular);
-  glLightfv(GL_LIGHT1, GL_AMBIENT, Ambient);
-  glLightfv(GL_LIGHT1, GL_DIFFUSE, Diffuse);
-  glLightfv(GL_LIGHT1, GL_SPECULAR, Specular);
+  if(scene == 0 && day == 0) {
+    // determine if it is night or day (currently only matters for scene 0)
+    // set night light properties
+    glLightfv(GL_LIGHT1, GL_AMBIENT, Ambient);
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, Diffuse);
+    glLightfv(GL_LIGHT1, GL_SPECULAR, Specular);
+  }
+  else {
+    // day or scene other than scene 0
+    glLightfv(GL_LIGHT0, GL_AMBIENT, Ambient);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, Diffuse);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, Specular);
+  }
+  
   // choose flat or smooth lighting
   glShadeModel(GL_SMOOTH); //GL_SMOOTH or GL_FLAT
   
@@ -301,6 +326,7 @@ void display() {
   }
   // display one of the simple scenes with a light rotating around an object
   else {
+    glDisable(GL_CULL_FACE);
     glPushMatrix(); // in case I choose to do any rotation or scaling in the scenes
     // raise or lower the light
     l0Position[1] += lZ;
@@ -512,13 +538,18 @@ int main(int argc, char** argv) {
   glutIdleFunc(idle);
   glutReshapeFunc(reshape);
   // Enable Z-buffer depth test
-  glEnable(GL_DEPTH_TEST); 
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_BACK);
+  glFrontFace(GL_CCW);
   // Load textures
   texture[0] = LoadTexBMP("snow.bmp");
   texture[1] = LoadTexBMP("snow2.bmp");
   texture[2] = LoadTexBMP("snow3.bmp");
   texture[3] = LoadTexBMP("candyCane.bmp");
   texture[4] = LoadTexBMP("grass.bmp"); //Attribution: <a href="https://www.freepik.com/free-photo/green-grass-field-background_991898.htm#&position=0&from_view=author">Image by awesomecontent</a> on Freepik
+  // Create shader programs
+  shaders[0] = CreateShaderProg("texture.vert", "texture.frag");
   // Finally, allow the window to draw
   ErrCheck("init");
   glutMainLoop();
