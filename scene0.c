@@ -14,13 +14,15 @@
  * @param texture:
  *   texture[0] is snow.bmp
  *   texture[1] is snow2.bmp
+ * @param shaders: An array of shader program names
  */
-void scene0(int dim, int light, float l0Position[4], float l1Position[4], int day, unsigned int texture[]) { 
+void scene0(int dim, int light, float l0Position[4], float l1Position[4], int day, unsigned int texture[], unsigned int shaders[]) {
   // store our view of the projection by pushing the matrix
   glPushMatrix();
 
   // If we want lighting, place a ball at the light and enable lighting.
   glDisable(GL_LIGHTING);
+  glUseProgram(0); // standard pipeline for light balls
   if(light) {
     glPushMatrix();
     // create the plane for the sun and moon to sit on; assume 40 degrees north latitude
@@ -48,7 +50,7 @@ void scene0(int dim, int light, float l0Position[4], float l1Position[4], int da
     baseGreen = nightGreen;
   glColor4fv(baseGreen);
   // lighting materials
-  glBindTexture(GL_TEXTURE_2D, texture[4]); // grass texture
+  glBindTexture(GL_TEXTURE_2D, texture[4]); // grass texture (4)
   glMaterialfv(GL_FRONT, GL_AMBIENT, baseGreen);
   glMaterialfv(GL_FRONT, GL_DIFFUSE, baseGreen);
   // texture settings
@@ -62,6 +64,10 @@ void scene0(int dim, int light, float l0Position[4], float l1Position[4], int da
   glTexCoord2f(10, 0); glVertex3f(0.8*dim, 0, -0.8*dim);
   glEnd();
   // done creating base plate (grass)
+
+  // turn on a shader program
+  glUseProgram(shaders[1]);
+
   // place some candy canes
   CandyCane(0.8, 4.0, 1.5, 180, texture[3]);
   glTranslatef(2.0, -1.0, 2.0); // offset from the previous candy cane

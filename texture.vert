@@ -1,4 +1,5 @@
 //  Phong lighting
+//  Modified from Example 25
 #version 120
 
 const int numLights = 2;
@@ -33,6 +34,9 @@ void main()
                + Is*gl_FrontLightProduct[i].specular);
    } // end of loop over lights
 
+   // Note: Moving seems to have an impact on specular, but turning the camera does not. I am not sure why that is.
+
+   myColor.w = 1.0;
    gl_FrontColor = myColor;
    // My own addition to try and mimic Modulate texture mode (otherwise, untextured objects appear white)
    gl_FrontColor *= gl_Color;

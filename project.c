@@ -11,7 +11,7 @@
 
 // Macros
 #define NUM_TEX 5 // number of textures
-#define NUM_PROGS 1 // number of shader programs
+#define NUM_PROGS 2 // number of shader programs
 
 // Forward declarations
 void updateFpVecs();
@@ -52,7 +52,7 @@ int useTexture; // flag whether texture is enabled (1) or diabled (0); set in in
 unsigned int texture[NUM_TEX];  //  Texture names
 int ntex = 0; // which index of texture array we're using
 // shaders
-unsigned int shaders[NUM_PROGS];
+unsigned int shaders[NUM_PROGS]; // this holds the shader programs
 
 
 // BEGIN UTILITY FUNCTIONS
@@ -322,7 +322,7 @@ void display() {
   // AT THIS POINT, LIGHT0 HAS NO POSITION! HANDLE THAT IN THE SCENE YOU DRAW.
   if(scene == 0) {
     // Create the objects in the scene
-    scene0(dim, light, l0Position, l1Position, day, texture);
+    scene0(dim, light, l0Position, l1Position, day, texture, shaders);
   }
   // display one of the simple scenes with a light rotating around an object
   else {
@@ -549,7 +549,8 @@ int main(int argc, char** argv) {
   texture[3] = LoadTexBMP("candyCane.bmp");
   texture[4] = LoadTexBMP("grass.bmp"); //Attribution: <a href="https://www.freepik.com/free-photo/green-grass-field-background_991898.htm#&position=0&from_view=author">Image by awesomecontent</a> on Freepik
   // Create shader programs
-  shaders[0] = CreateShaderProg("texture.vert", "texture.frag");
+  shaders[0] = CreateShaderProg("texture.vert", "texture.frag"); // mimic standard pipeline
+  shaders[1] = CreateShaderProg("pixtex.vert", "pixtex.frag"); // per-pixel lighting
   // Finally, allow the window to draw
   ErrCheck("init");
   glutMainLoop();

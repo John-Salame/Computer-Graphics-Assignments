@@ -111,10 +111,12 @@
  * Due Tues, 12/6/22
  * Revisions and work log:
  *   Reading and preparation: 10 - 20 hours
- *   Version 0 Wed. 11/23/22 8:00 PM - 9:00 PM (1 hr)
+ *   Version 0 (1 hr)
+ *     Wed. 11/23/22 8:00 PM - 9:00 PM (1 hr)
  *     Fix the names of things to say Final Project
  *     Begin making the normal map creator in Python
- *   Version 1 Wed. 11/23/22 9:00 PM - Thurs 11/24/22 1:00 AM (4 hr)
+ *   Version 1 (4 hr)
+ *     Wed. 11/23/22 9:00 PM - Thurs 11/24/22 1:00 AM (4 hr)
  *     I created a script to produce a normal map for an image.
  *     So far, it only creates the X component of the normal map.
  *     The Y component is 128, and the Z component is 255.
@@ -124,4 +126,6 @@
  *       Still unsure if the winding on the ball is correct. I might just disable culling when I draw it.
  *     Fri. 11/25/22 7:40 AM - 9:40 AM = 2 hr attempt to mimic standard pipeline with two LightPos
  *     Fri. 11/25/22 11:00 AM - 11:30 AM = 0.5 hr - Shader imitating standard pipeline works!
+ *   Version 3 (1 hr)
+ *     Fri. 11/25/22 12:00 PM - 1:00 PM = 1 hr Per-Pixel Lighting With Multiple Lights
  */

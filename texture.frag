@@ -1,4 +1,5 @@
 //  Set the fragment color
+//  Taken from Example 25
 #version 120
 
 uniform sampler2D tex;
