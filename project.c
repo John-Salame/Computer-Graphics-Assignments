@@ -12,7 +12,7 @@
 // Macros
 #define NUM_TEX 5 // number of textures
 #define NUM_PROGS 3 // number of shader programs
-#define NUM_NORMAL_MAPS 2
+#define NUM_NORMAL_MAPS 4
 
 // Forward declarations
 void updateFpVecs();
@@ -343,7 +343,7 @@ void display() {
       CandyCane(0.5, 1.0, 1.0, 180, texture[3]);
     }
     else if (scene == 2) {
-      threeDCos(texture[2]); // snow pile using snow3.bmp texture
+      threeDCos(texture[2], normalMaps[2], shaders[2], shaders); // snow pile using snow3.bmp texture
     }
     glPopMatrix();
   } 
@@ -550,8 +550,10 @@ int main(int argc, char** argv) {
   texture[3] = LoadTexBMP("candyCane.bmp");
   texture[4] = LoadTexBMP("grass.bmp"); //Attribution: <a href="https://www.freepik.com/free-photo/green-grass-field-background_991898.htm#&position=0&from_view=author">Image by awesomecontent</a> on Freepik
   // Load normal maps
-  normalMaps[0] = LoadTexBMP("candyCane_normal.bmp");
-  normalMaps[1] = LoadTexBMP("snow_normal.bmp");
+  normalMaps[0] = LoadTexBMP("snow_normal.bmp");
+  normalMaps[1] = LoadTexBMP("snow2_normal.bmp");
+  normalMaps[2] = LoadTexBMP("snow3_normal.bmp");
+  normalMaps[3] = LoadTexBMP("candyCane_normal.bmp");
   // Create shader programs
   shaders[0] = CreateShaderProg("texture.vert", "texture.frag"); // mimic standard pipeline
   shaders[1] = CreateShaderProg("pixtex.vert", "pixtex.frag"); // per-pixel lighting

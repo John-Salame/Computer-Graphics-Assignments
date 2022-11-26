@@ -1,7 +1,9 @@
-//  Per Pixel Lighting shader with texture
-//  Modified from Example 25
+//  Per Pixel Lighting shader with texture and normal map
+//  Modified from Per-Pixel Lighting
 #version 120
 
+// supplying attribute: https://stackoverflow.com/questions/27671741/how-are-attributes-passed-to-vertex-shader-in-glsl
+attribute vec3 InTangent;
 varying vec4 P;
 varying mat3 TangentSpace;
 
@@ -11,8 +13,8 @@ void main()
    P = gl_ModelViewMatrix * gl_Vertex;
    //  Tangent Space
    //  I will normalize Tangent Space vectors in the fragment shader after they are interpolated.
+   vec3 Tangent = vec3(gl_ModelViewMatrix * vec4(InTangent, 0.0));
    vec3 Normal = gl_NormalMatrix * gl_Normal;
-   vec3 Tangent = vec3(gl_ModelViewMatrix * vec4(1.0, 0.0, 0.0, 0.0));
    vec3 Bitangent = cross(Normal, Tangent);
    TangentSpace[0] = Tangent;
    TangentSpace[1] = Bitangent;

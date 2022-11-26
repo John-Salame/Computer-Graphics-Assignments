@@ -10,8 +10,19 @@
  * Good for making mounds of snow
  * @param unsigned int texName: The name of the texture to use
  */
-void threeDCos(unsigned int texName) {
-  // prepare texture
+void threeDCos(unsigned int texName, unsigned int normalMapName, unsigned int programName, unsigned int *shaders) {
+  // prepare textures
+  unsigned int texLoc = glGetUniformLocation(programName, "tex");
+  unsigned int normalLoc = glGetUniformLocation(programName, "normalMap");
+  // bind the uniform samplers to texture units (0 for decal, 1 for normal map)
+  glUniform1i(texLoc, 0);
+  glUniform1i(normalLoc, 1);
+  // texture settings
+  glActiveTexture(GL_TEXTURE0 + 1);
+  glBindTexture(GL_TEXTURE_2D, normalMapName);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT); // only reflect in the vertical direction (z on the snow pile)
+  glActiveTexture(GL_TEXTURE0 + 0);
   glBindTexture(GL_TEXTURE_2D, texName);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT); // only reflect in the vertical direction (z on the snow pile)
@@ -29,7 +40,9 @@ void threeDCos(unsigned int texName) {
   glMaterialfv(GL_FRONT, GL_AMBIENT, white); // snow looks blue at night
   glMaterialfv(GL_FRONT, GL_DIFFUSE, white);
   glMaterialfv(GL_FRONT, GL_SPECULAR, blue);
-  //glMaterialfv(GL_FRONT, GL_SPECULAR, blue);
+  // enable the vertex attribute for Tangent vector
+  unsigned int tangentIndex = glGetAttribLocation(programName, "InTangent");
+  glEnableVertexAttribArray(tangentIndex);
   // b is the z position
   for(int b = -90; b < 90; b+= interval) {
     xLoc = min;
@@ -38,11 +51,13 @@ void threeDCos(unsigned int texName) {
     for(int a = -90; a <= 90; a += interval) {
       // point 1
       // the normal is the gradient of the function, where the function value is y
+      glVertexAttrib3f(tangentIndex, 1.0, -0.5*3.14159*Sin(a), 0.0);
       glNormal3f(0.5*3.14159*Sin(a), 1.0, 0.5*3.14159*Sin(b));
       glTexCoord2f(reps*(xLoc+0.5), reps*(zLoc+0.5));
       glVertex3f(xLoc, 0.5*Cos(b)+0.5*Cos(a)-0.5, zLoc);
       // point 2
       // without this normal, the mound appears to have flat shading even when the mode is smooth shading
+      glVertexAttrib3f(tangentIndex, 1.0, -0.5*3.14159*Sin(a), 0.0);
       glNormal3f(0.5*3.14159*Sin(a), 1.0, 0.5*3.14159*Sin(b+interval));
       glTexCoord2f(reps*(xLoc+0.5), reps*(zLoc+cartInterval+0.5));
       glVertex3f(xLoc, 0.5*Cos(b+interval)+0.5*Cos(a)-0.5, zLoc+cartInterval); // the next row of z
@@ -51,5 +66,7 @@ void threeDCos(unsigned int texName) {
     glEnd();
     zLoc += cartInterval;
   }
+  glUseProgram(shaders[1]);
+  ErrCheck("snow pile");
 }
 

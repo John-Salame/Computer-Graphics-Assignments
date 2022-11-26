@@ -61,7 +61,7 @@ void scene0(int dim, int light, float l0Position[4], float l1Position[4], int da
   // bind the textures to the correct texture units
   // both texture units also need the correct wrapping settings.
   glActiveTexture(GL_TEXTURE0 + 1);
-  glBindTexture(GL_TEXTURE_2D, normalMaps[0]);
+  glBindTexture(GL_TEXTURE_2D, normalMaps[3]);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
   glActiveTexture(GL_TEXTURE0 + 0);
@@ -96,7 +96,7 @@ void scene0(int dim, int light, float l0Position[4], float l1Position[4], int da
   glPushMatrix(); // so I can make a small candy cane at this position soon
   glRotatef(-130, 0, 1.0, 0);
   glScalef(6.0, 2.0, 5.0);
-  threeDCos(texture[2]); // first snow mound
+  threeDCos(texture[2], normalMaps[2], normalShader, shaders); // first snow mound
   glPopMatrix();
   glPushMatrix();
   // make a small tilted candy cane in the snow pile
@@ -108,7 +108,7 @@ void scene0(int dim, int light, float l0Position[4], float l1Position[4], int da
   // make one more snow pile, but smaller and taller
   glTranslatef(-3, 0, -2);
   glScalef(4.5, 3.5, 5.0);
-  threeDCos(texture[0]); //snow.bmp texture
+  threeDCos(texture[0], normalMaps[0], normalShader, shaders); //snow.bmp texture
   // return to the origin of the scene and save it again
   glPopMatrix();
   glPushMatrix();
@@ -116,7 +116,7 @@ void scene0(int dim, int light, float l0Position[4], float l1Position[4], int da
   glTranslatef(-6, 0, 8);
   glPushMatrix();
   glScalef(10, 2.5, 10);
-  threeDCos(texture[2]);
+  threeDCos(texture[2], normalMaps[2], normalShader, shaders);
   glPopMatrix();
   // make a candy cane in the large snow pile
   glTranslatef(1, 0, 0);

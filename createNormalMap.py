@@ -74,12 +74,14 @@ def red_normal(k, img):
     vertical_convolution = np.abs(np.transpose(kernel))
     for i in range(h-2*k):
         red_img[i+k, :] = np.sum(red_img_old[i:(i+1+2*k), :] * vertical_convolution, axis=0) # add the rows belonging to the kernel, centered at i+k
+    '''
     # now, smooth horizontally
     red_img_old = red_img
     smoothing = np.abs(kernel)
     for j in range(w-2*k):
         cur_cols = img_pad[:, j:(j+1+2*k)]
         red_img[:, j+k] = np.sum(red_img_old[:, j:(j+1+2*k)] * smoothing, axis=1) # element-wise multiplication
+    '''
     # now, keep only the original image dimensions
     red_img = red_img[k:(h-k), k:(w-k)]
     print(red_img.shape)

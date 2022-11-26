@@ -8,7 +8,7 @@
 #define MY_OBJECTS
 
 // threeDCos is a function to create a mound of snow (snow.c)
-void threeDCos(unsigned int texName);
+void threeDCos(unsigned int texName, unsigned int normalMapName, unsigned int programName, unsigned int *shaders);
 // functions related to the candy cane (candyCane.c)
 void Circle(float circlePrecision, float r, float ox, float oy, float oz);
 void RedStripedCylinderWall(int circlePrecision, float crossRad, float straightHeight);

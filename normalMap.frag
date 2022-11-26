@@ -1,5 +1,5 @@
-//  Per Pixel Lighting shader with texture
-//  Modified from Example 25
+//  Per Pixel Lighting shader with texture and normal map
+//  Modified from Per-Pixel Lighting
 #version 120
 
 const int numLights = 2;
