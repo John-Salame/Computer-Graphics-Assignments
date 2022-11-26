@@ -16,7 +16,8 @@
  *   texture[1] is snow2.bmp
  * @param shaders: An array of shader program names
  */
-void scene0(int dim, int light, float l0Position[4], float l1Position[4], int day, unsigned int texture[], unsigned int shaders[]) {
+void scene0(int dim, int light, float l0Position[4], float l1Position[4], int day, unsigned int texture[], unsigned int normalMaps[], unsigned int shaders[]) {
+  unsigned int normalShader = shaders[2];
   // store our view of the projection by pushing the matrix
   glPushMatrix();
 
@@ -41,6 +42,7 @@ void scene0(int dim, int light, float l0Position[4], float l1Position[4], int da
   }
 
   // create the base plate
+  glUseProgram(normalShader); // normal map
   float dayGreen[] = {50/255.0, 205/255.0, 50/255.0, 1.0}; // lime green color code
   float nightGreen[] = {34/255.0, 139/255.0, 34/255.0, 1.0}; // forest green color code
   float *baseGreen = 0;
@@ -49,13 +51,26 @@ void scene0(int dim, int light, float l0Position[4], float l1Position[4], int da
   else
     baseGreen = nightGreen;
   glColor4fv(baseGreen);
-  // lighting materials
-  glBindTexture(GL_TEXTURE_2D, texture[4]); // grass texture (4)
-  glMaterialfv(GL_FRONT, GL_AMBIENT, baseGreen);
-  glMaterialfv(GL_FRONT, GL_DIFFUSE, baseGreen);
-  // texture settings
+  // passing two textures to a shader (decal and normal map)
+  // https://stackoverflow.com/questions/25252512/how-can-i-pass-multiple-textures-to-a-single-shader
+  unsigned int texLoc = glGetUniformLocation(normalShader, "tex");
+  unsigned int normalLoc = glGetUniformLocation(normalShader, "normalMap");
+  // bind the uniform samplers to texture units (0 for decal, 1 for normal map)
+  glUniform1i(texLoc, 0);
+  glUniform1i(normalLoc, 1);
+  // bind the textures to the correct texture units
+  // both texture units also need the correct wrapping settings.
+  glActiveTexture(GL_TEXTURE0 + 1);
+  glBindTexture(GL_TEXTURE_2D, normalMaps[0]);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+  glActiveTexture(GL_TEXTURE0 + 0);
+  glBindTexture(GL_TEXTURE_2D, texture[3]); // grass texture (4)
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+  // lighting materials
+  glMaterialfv(GL_FRONT, GL_AMBIENT, baseGreen);
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, baseGreen);
   glNormal3f(0, 1, 0); // the normal vector of the ground is up
   glBegin(GL_QUADS);
   glTexCoord2f(0, 0); glVertex3f(-0.8*dim, 0, -0.8*dim);

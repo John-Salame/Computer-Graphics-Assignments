@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image
 import cv2
 import sys
+from PIL import Image
 
 # Assumption is that gray areas are indented and white areas are just normal.
 # This assumption works for snow and candy cane.
@@ -57,20 +58,29 @@ def red_normal(k, img):
 
     # create the kernel
     # The kernel should be (k*2+1 by k*2+1), but I will make int only one row wide and use a trick
-    coef = 1 / (2*k+1)
+    # coef = 1 / (2*k+1)
+    coef = 1/(2*k+1)
     kernel = np.zeros((1, 2*k+1))
     kernel[:, 0:k] = coef
     kernel[:, k+2:] = -1 * coef
-    # make it compatible with matrix multiplication
-    # kernel = np.transpose(kernel)
 
     # apply the kernel to columns of the padded matrix
     red_img = np.zeros(img_pad.shape)
     for j in range(w-2*k):
         cur_cols = img_pad[:, j:(j+1+2*k)]
-        # red_img[:, j+k] = np.sum(np.multiply(kernel, img_pad[:, j:(j+1+2*k)]), axis=1)
-        red_img[:, j+k] = np.sum(img_pad[:, j:(j+1+2*k)] * kernel, axis=1)
-        # red_img[:, j+k] = np.matmul(img_pad[:, j:(j+1+2*k)], kernel)
+        red_img[:, j+k] = np.sum(img_pad[:, j:(j+1+2*k)] * kernel, axis=1) # element-wise multiplication
+    # now average over the vertical part of the kernel
+    red_img_old = red_img
+    vertical_convolution = np.abs(np.transpose(kernel))
+    for i in range(h-2*k):
+        red_img[i+k, :] = np.sum(red_img_old[i:(i+1+2*k), :] * vertical_convolution, axis=0) # add the rows belonging to the kernel, centered at i+k
+    # now, smooth horizontally
+    red_img_old = red_img
+    smoothing = np.abs(kernel)
+    for j in range(w-2*k):
+        cur_cols = img_pad[:, j:(j+1+2*k)]
+        red_img[:, j+k] = np.sum(red_img_old[:, j:(j+1+2*k)] * smoothing, axis=1) # element-wise multiplication
+    # now, keep only the original image dimensions
     red_img = red_img[k:(h-k), k:(w-k)]
     print(red_img.shape)
     print('max red %f' % np.amax(red_img))
@@ -87,7 +97,6 @@ def red_normal(k, img):
 
 def main():
     img = plt.imread(in_file)
-    k = 3 # radius of the kernel for various things
     print(type(img))
     print(img.shape)
     # keep intensities only (b here stands for brightness)
@@ -111,12 +120,16 @@ def main():
     plt.colorbar()
     plt.title('Normal Map')
     plt.show()
-    saveyn = input('save image? ')
+    saveyn = input('save image? (y/n) ')
     if saveyn.upper() == 'Y':
+        neutralRed = int(input('Decimal value for neutral red (enter 0 for no change): '))
+        if neutralRed > 0:
+            normal_map[:,:,0] += np.uint8(128 - neutralRed)
         extension_index = in_file.find('.bmp')
         out_file = in_file[:extension_index] + '_normal' + in_file[extension_index:]
         print("Saving normal map to file %s" % out_file)
-        matplotlib.image.imsave(out_file, normal_map)
+        im = Image.fromarray(normal_map)
+        im.save(out_file)
     return 0
 
 if __name__ == "__main__":
@@ -124,5 +137,10 @@ if __name__ == "__main__":
         raise Exception("Missing command line argument for input file name")
         sys.exit(1)
     in_file = sys.argv[1]
+    if len(sys.argv) > 2:
+        k = int(sys.argv[2])
+    else:
+        k = 3
+    print("Kernel is %d" % k)
     exit_status = main()
     sys.exit(exit_status)

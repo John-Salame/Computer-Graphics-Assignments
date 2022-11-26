@@ -11,7 +11,8 @@
 
 // Macros
 #define NUM_TEX 5 // number of textures
-#define NUM_PROGS 2 // number of shader programs
+#define NUM_PROGS 3 // number of shader programs
+#define NUM_NORMAL_MAPS 2
 
 // Forward declarations
 void updateFpVecs();
@@ -50,7 +51,7 @@ int axes;
 // texture settings
 int useTexture; // flag whether texture is enabled (1) or diabled (0); set in init()
 unsigned int texture[NUM_TEX];  //  Texture names
-int ntex = 0; // which index of texture array we're using
+unsigned int normalMaps[NUM_NORMAL_MAPS];
 // shaders
 unsigned int shaders[NUM_PROGS]; // this holds the shader programs
 
@@ -322,7 +323,7 @@ void display() {
   // AT THIS POINT, LIGHT0 HAS NO POSITION! HANDLE THAT IN THE SCENE YOU DRAW.
   if(scene == 0) {
     // Create the objects in the scene
-    scene0(dim, light, l0Position, l1Position, day, texture, shaders);
+    scene0(dim, light, l0Position, l1Position, day, texture, normalMaps, shaders);
   }
   // display one of the simple scenes with a light rotating around an object
   else {
@@ -548,9 +549,13 @@ int main(int argc, char** argv) {
   texture[2] = LoadTexBMP("snow3.bmp");
   texture[3] = LoadTexBMP("candyCane.bmp");
   texture[4] = LoadTexBMP("grass.bmp"); //Attribution: <a href="https://www.freepik.com/free-photo/green-grass-field-background_991898.htm#&position=0&from_view=author">Image by awesomecontent</a> on Freepik
+  // Load normal maps
+  normalMaps[0] = LoadTexBMP("candyCane_normal.bmp");
+  normalMaps[1] = LoadTexBMP("snow_normal.bmp");
   // Create shader programs
   shaders[0] = CreateShaderProg("texture.vert", "texture.frag"); // mimic standard pipeline
   shaders[1] = CreateShaderProg("pixtex.vert", "pixtex.frag"); // per-pixel lighting
+  shaders[2] = CreateShaderProg("normalMap.vert", "normalMap.frag");
   // Finally, allow the window to draw
   ErrCheck("init");
   glutMainLoop();

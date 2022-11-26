@@ -128,4 +128,6 @@
  *     Fri. 11/25/22 11:00 AM - 11:30 AM = 0.5 hr - Shader imitating standard pipeline works!
  *   Version 3 (1 hr)
  *     Fri. 11/25/22 12:00 PM - 1:00 PM = 1 hr Per-Pixel Lighting With Multiple Lights
+ *   Version 4
+ *     Fri. 12/25/22 3:50 PM - 7:20 PM = 3.5 hr get normal maps working on flat surfaces (looks more like bumps than cuts though)
  */
