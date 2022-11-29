@@ -129,8 +129,10 @@
  *   Version 3 (1 hr)
  *     Fri. 11/25/22 12:00 PM - 1:00 PM = 1 hr Per-Pixel Lighting With Multiple Lights
  *   Version 4 (3.5 hr)
- *     Fri. 12/25/22 3:50 PM - 7:20 PM = 3.5 hr get normal maps working on flat surfaces (looks more like bumps than cuts though)
- *   Version 5
- *     Fri. 12/25/22 8:45 PM - Sat. 12/26/22 12:15 AM = 3.5 hr Read and prepare for vertex attribute
- *     
+ *     Fri. 11/25/22 3:50 PM - 7:20 PM = 3.5 hr get normal maps working on flat surfaces (looks more like bumps than cuts though)
+ *   Version 5 (3.5 hr)
+ *     Fri. 11/25/22 8:45 PM - Sat. 12/26/22 12:15 AM = 3.5 hr Read and prepare for vertex attribute
+ *   Version 6 (2.7 hr)
+ *     Mon. 11/28/22 7:00 PM - 7:42 PM = 0.7 hr troubleshooting and fixing normal map on snow pile (I had forgotten to set the program like an idiot!)
+ *     Mon. 11/28/22 7:42 PM - 9:42 PM = 2 hr get normal map on part of candy cane (not worth it, the effect is much too subtle)
  */

@@ -340,10 +340,10 @@ void display() {
     }
     // now choose object based on scene
     if (scene == 1) {
-      CandyCane(0.5, 1.0, 1.0, 180, texture[3]);
+      CandyCane(0.5, 1.0, 1.0, 180, texture[3], normalMaps[3], shaders[2]);
     }
     else if (scene == 2) {
-      threeDCos(texture[2], normalMaps[2], shaders[2], shaders); // snow pile using snow3.bmp texture
+      threeDCos(texture[2], normalMaps[2], shaders[2]); // snow pile using snow3.bmp texture
     }
     glPopMatrix();
   } 
