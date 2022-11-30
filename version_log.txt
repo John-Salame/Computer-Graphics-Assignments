@@ -136,7 +136,10 @@
  *     Mon. 11/28/22 3:00 PM - 3:30 PM = 0.5 hr Some debugging of normal map on curved surface
  *     Mon. 11/28/22 7:00 PM - 7:42 PM = 0.7 hr troubleshooting and fixing normal map on snow pile (I had forgotten to set the program like an idiot!)
  *     Mon. 11/28/22 7:42 PM - 9:42 PM = 2 hr get normal map on part of candy cane (not worth it, the effect is much too subtle)
- *   Version 7 
+ *   Version 7 (7.5 hours)
  *     Tues. 11/29/22 9:00 PM - Wed. 11/30/22 4:30 AM = 7.5 hr get wooden bench working
  *       Geometry, textures, normal maps; 256 lines of code in 7.5 hours
+ *       The bench is still incomplete and the only part I focused on was the seat. Everything else is awful.
+ *   Version 7.5 (0.4 hours)
+ *     Wed. 11/30/22 4:30 AM - 4:51 AM = 0.4 hours updating README
  */
