@@ -18,6 +18,7 @@
  */
 void scene0(int dim, int light, float l0Position[4], float l1Position[4], int day, unsigned int texture[], unsigned int normalMaps[], unsigned int shaders[]) {
   unsigned int normalShader = shaders[2];
+  unsigned int normalMixShader = shaders[3]; // normal map shader with a baseline intensity of glColor
   // store our view of the projection by pushing the matrix
   glPushMatrix();
 
@@ -91,9 +92,11 @@ void scene0(int dim, int light, float l0Position[4], float l1Position[4], int da
   ErrCheck("base plate");
   // done creating base plate (grass)
 
-  // turn on a shader program
-  glUseProgram(shaders[1]);
-
+  // place a park bench
+  glPushMatrix();
+  glTranslatef(-5, 0.0, -0.5);
+  bench(5, 2.5, 2, texture[3], normalMaps[3], normalShader); // or normalMixShader
+  glPopMatrix();
   // place some candy canes
   CandyCane(0.8, 4.0, 1.5, 180, texture[3], normalMaps[3], normalShader);
   glTranslatef(2.0, -1.0, 2.0); // offset from the previous candy cane

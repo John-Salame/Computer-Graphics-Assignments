@@ -1,7 +1,7 @@
 # project
 EXE=project
 SCENE_DEPS=myCSCI5229.h objects.h scenes.h
-OBJECTS=candyCane.o snow.o ball.o
+OBJECTS=candyCane.o snow.o ball.o bench.o
 
 # Main target
 all: $(EXE)
@@ -40,6 +40,7 @@ loadProgram.o: loadProgram.c myCSCI5229.h
 candyCane.o: candyCane.c objects.h myCSCI5229.h
 snow.o: snow.c objects.h myCSCI5229.h
 ball.0: ball.c objects.h myCSCI5229.h
+bench.o: bench.c objects.h myCSCI5229.h
 
 # scenes.a dependencies
 scene0.o: scene0.c objects.h myCSCI5229.h

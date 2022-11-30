@@ -1,16 +1,29 @@
-//  Per Pixel Lighting shader with texture
-//  Modified from Example 25
+//  Per Pixel Lighting shader with texture and normal map
+//  Modified from Per-Pixel Lighting
+//  This is the same as normalMap.frag but with a baseline intensity of gl_Color with the texture+lighting added on top
+//  The normalMap.frag had no baseline for color, it just multiplied gl_Color by the texture and lighting
+//  The change is this line: myColor = gl_Color * (0.2 + 0.8*myColor);
 #version 120
 
 const int numLights = 2;
 varying vec4 P;
-varying vec3 Normal;
+varying mat3 TangentSpace;
+
 uniform sampler2D tex;
+uniform sampler2D normalMap;
 
 void main()
 {
-   //  N is the object normal
-   vec3 N = normalize(Normal);
+   //  N is the object normal; calculate it from the tangent space and the normal map
+   // First, normalize the interpolated tangent space vectors
+   mat3 TangentSpaceNormalized;
+   for(int i = 0; i < 3; i++) {
+      TangentSpaceNormalized[i] = normalize(TangentSpace[i]);
+   }
+   // now, get the normal map rgb data and then use it as weights for the tangent space vectors to compute a normal
+   vec3 normalData = vec3(texture2D(normalMap,gl_TexCoord[0].xy));
+   normalData = normalize(2*normalData - 1);
+   vec3 N = normalize(TangentSpaceNormalized * normalData);
    //  V is the view vector (eye vector)
    vec3 V = normalize(-P.xyz);
 

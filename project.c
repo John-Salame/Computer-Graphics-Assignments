@@ -11,7 +11,7 @@
 
 // Macros
 #define NUM_TEX 5 // number of textures
-#define NUM_PROGS 3 // number of shader programs
+#define NUM_PROGS 4 // number of shader programs
 #define NUM_NORMAL_MAPS 4
 
 // Forward declarations
@@ -44,7 +44,7 @@ int lTh; // theta and phi of the light; sun and moon use only theta.
 float lZ; // z value of the light
 // other display variables
 int scene = 0; // choose which scene to render
-int numScenes = 3;
+int numScenes = 4;
 int controlLight = 0; // when enabled, you can stop the light and move it around with arrow keys
 int pause = 0; // when enabled, stop the light
 int axes;
@@ -108,6 +108,9 @@ void init() {
       // do nothing
       break;
     case 2:
+      // do nothing
+      break;
+    case 3:
       // do nothing
       break;
     default:
@@ -345,6 +348,9 @@ void display() {
     else if (scene == 2) {
       threeDCos(texture[2], normalMaps[2], shaders[2]); // snow pile using snow3.bmp texture
     }
+    else if (scene == 3) {
+      bench(0.8*dim, 0.6*dim, 0.4*dim, texture[3], normalMaps[3], shaders[3]); // use "normal map mix" shader
+    }
     glPopMatrix();
   } 
 
@@ -558,6 +564,7 @@ int main(int argc, char** argv) {
   shaders[0] = CreateShaderProg("texture.vert", "texture.frag"); // mimic standard pipeline
   shaders[1] = CreateShaderProg("pixtex.vert", "pixtex.frag"); // per-pixel lighting
   shaders[2] = CreateShaderProg("normalMap.vert", "normalMap.frag");
+  shaders[3] = CreateShaderProg("normalMap.vert", "normalMapMix.frag");
   // Finally, allow the window to draw
   ErrCheck("init");
   glutMainLoop();
