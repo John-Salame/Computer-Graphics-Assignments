@@ -142,4 +142,8 @@
  *       The bench is still incomplete and the only part I focused on was the seat. Everything else is awful.
  *   Version 7.5 (0.4 hours)
  *     Wed. 11/30/22 4:30 AM - 4:51 AM = 0.4 hours updating README
+ *   Version 8 (0.7 hours)
+ *     Wed. 11/30/22 4:51 AM - 5:33 AM = 0.7 hr fix but in normal map generator (Python)
+ *       I had an inbalanced kernel and that made everything wonky. I noticed the one incorrect value and changed it.
+ *       I decided to keep the snow normal maps from the bugged version because I like the wonky melty look compared to the "correct" rigid version.
  */

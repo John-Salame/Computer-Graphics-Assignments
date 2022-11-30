@@ -62,7 +62,8 @@ def red_normal(k, img):
     coef = 1/(2*k+1)
     kernel = np.zeros((1, 2*k+1))
     kernel[:, 0:k] = coef
-    kernel[:, k+2:] = -1 * coef
+    kernel[:, (k+1):] = -1 * coef
+    print(kernel)
 
     # apply the kernel to columns of the padded matrix
     red_img = np.zeros(img_pad.shape)
