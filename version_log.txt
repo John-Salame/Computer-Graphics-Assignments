@@ -146,4 +146,6 @@
  *     Wed. 11/30/22 4:51 AM - 5:33 AM = 0.7 hr fix but in normal map generator (Python)
  *       I had an inbalanced kernel and that made everything wonky. I noticed the one incorrect value and changed it.
  *       I decided to keep the snow normal maps from the bugged version because I like the wonky melty look compared to the "correct" rigid version.
+ *   Version 9 (0 hr)
+ *     Fri. 1:20 PM change names to "final" instead of "project"
  */
