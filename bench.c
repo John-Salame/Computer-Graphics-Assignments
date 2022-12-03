@@ -67,29 +67,27 @@ void createFillet(float right, float radius, float side, float top,  unsigned in
     }
     glEnd();
 
-    // draw the front part of the butt slat where the fillet is
-    float texWidth = texS2 - texS1;
-    float offset = 0.5 - radius;
-    float texX = 0.5 + (right*offset); // get the x coordinate of the start or end of the texture that goes on the fillet front (in terms of [0,1])
-    texX = texS1 + texWidth*texX;
-    float texY = 1.0 - radius; // always radius below the top of the image
+    // draw the front part of the butt slat where the fillet is;
+    // both texture dimensions span [0, 1]
+    float texX = (1 - right) / 2.0; // if we have a right fillet, center x=0; else, center x=1
+    float texY = top - (radius / top); // 1.0 minus the proportion of slat height taken up by the fillet
     glBegin(GL_TRIANGLE_FAN);
-    glVertexAttrib1f(bitangentDirIndex, right*-1.0); // bitangent = tangent x normal
+    glVertexAttrib1f(bitangentDirIndex, right); // bitangent = normal x tangent if fillet is a right fillet
     glVertexAttrib3f(tangentIndex, 1.0, 0.0, 0.0);
     glTexCoord2f(texX, texY);
-    printf("fillet texX %f texY %f", texX, texY);
+    // printf("fillet texX %f texY %f", texX, texY);
     glNormal3f(0.0, 0.0, 1.0);
     glVertex3f(0.0, 0.0, 0.5);
     // draw clockwise
     if(right == 1.0) {
         for(int i = 3; i >= 0; i--) {
-            glTexCoord2f(texX+right*texWidth*Sin(30*i), texY+Cos(30*i));
+            glTexCoord2f(texX+right*Sin(30*i), texY+Cos(30*i));
             glVertex3f(x[i], y[i], 0.5);
         }
     }
     else {
         for(int i = 0; i < 4; i++) {
-            glTexCoord2f(texX+right*texWidth*Sin(30*i), texY+Cos(30*i));
+            glTexCoord2f(texX+right*Sin(30*i), texY+Cos(30*i));
             glVertex3f(x[i], y[i], 0.5);
         }
     }
@@ -122,13 +120,15 @@ void buttSlat(float thickness, float filletRad, float flatWidth, unsigned int pr
     ErrCheck("bench butt slat enable vertex attributes");
 
     // set most of the globals
+    const float incrementFraction = 0.125;
+    const float texScrunch = 1.0; // hos much to compress the texture (higher = more density of cracks / grain in wood)
     const float benchTop = thickness;
     const float flatStart = filletRad; // x value of flat part
     const float flatEnd = flatStart + flatWidth;
     const float width = 2*filletRad + flatWidth;
     float filletBottom = thickness - filletRad; // how high up the side quads should go
-    float texSpan = texS2 - texS1;
-    float texIncrement = texSpan / 8.0; // sides = 1 texIncrement, fillets = 1 texIncrement, top = 4 texIncrement
+    const float texSpan = texScrunch * (texS2 - texS1);
+    const float texIncrement = texSpan * incrementFraction; // sides = 1 texIncrement, fillets = 1 texIncrement, top = 4 texIncrement
     float texStart = texS1; // start of the current quad's texture
     float texEnd = texStart + texIncrement;
 
@@ -137,7 +137,7 @@ void buttSlat(float thickness, float filletRad, float flatWidth, unsigned int pr
     // bottom (spans the whole texture texS1 (0.0) to texS2 (width))
     // s aligns with x and t aligns with -z
     texStart = texS1;
-    texEnd = texS2;
+    texEnd = texS1 + texSpan;
     glNormal3f(0.0, -1.0, 0.0);
     glVertexAttrib3f(tangentIndex, 1.0, 0.0, 0.0);
     glVertexAttrib1f(bitangentDirIndex, -1.0); // bitangent = tangent x normal
@@ -179,26 +179,26 @@ void buttSlat(float thickness, float filletRad, float flatWidth, unsigned int pr
     glTexCoord2f(texStart, 1.0); glVertex3f(width, filletBottom, -0.5);
 
     // front panel part 1 (lower part)
-    texStart = texS1;
-    texEnd = texS2;
+    texStart = 0.0;
+    texEnd = 1.0;
+    float filletBottomTex = 1.0-2*incrementFraction;
     glNormal3f(0.0, 0.0, 1.0);
     glVertexAttrib3f(tangentIndex, 0.0, 1.0, 0.0);
     glVertexAttrib1f(bitangentDirIndex, -1.0); // bitangent = tangent x normal
-    // note: flatEnd is the same proportion as (thickness-filletRad)/thickness
-    glTexCoord2f(texStart, flatEnd); glVertex3f(0.0, filletBottom, 0.5);
+    glTexCoord2f(texStart, filletBottomTex); glVertex3f(0.0, filletBottom, 0.5);
     glTexCoord2f(texStart, 0.0); glVertex3f(0.0, 0.0, 0.5);
     glTexCoord2f(texEnd, 0.0); glVertex3f(width, 0.0, 0.5);
-    glTexCoord2f(texEnd, flatEnd); glVertex3f(width, filletBottom, 0.5);
+    glTexCoord2f(texEnd, filletBottomTex); glVertex3f(width, filletBottom, 0.5);
     //front panel part 2 (upper part)
-    texStart = texS1;
-    texEnd = texS2;
+    texStart = 2*incrementFraction;
+    texEnd = 1.0-2*incrementFraction;
     glNormal3f(0.0, 0.0, 1.0);
     glVertexAttrib3f(tangentIndex, 0.0, 1.0, 0.0);
     glVertexAttrib1f(bitangentDirIndex, -1.0); // bitangent = tangent x normal
-    glTexCoord2f(texStart+flatStart*texSpan, 1.0); glVertex3f(flatStart, benchTop, 0.5);
-    glTexCoord2f(texStart+flatStart*texSpan, flatEnd); glVertex3f(flatStart, filletBottom.0, 0.5);
-    glTexCoord2f(texStart+flatEnd*texSpan, flatEnd); glVertex3f(flatEnd, filletBottom, 0.5);
-    glTexCoord2f(texStart+flatEnd*texSpan, 1.0); glVertex3f(flatEnd, benchTop, 0.5);
+    glTexCoord2f(texStart, 1.0); glVertex3f(flatStart, benchTop, 0.5);
+    glTexCoord2f(texStart, filletBottomTex); glVertex3f(flatStart, filletBottom, 0.5);
+    glTexCoord2f(texEnd, filletBottomTex); glVertex3f(flatEnd, filletBottom, 0.5);
+    glTexCoord2f(texEnd, 1.0); glVertex3f(flatEnd, benchTop, 0.5);
     glEnd();
     // make the right fillet and then the left fillet
     // params: right (1.0 or -1.0), radius, side, top
