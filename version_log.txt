@@ -147,5 +147,8 @@
  *       I had an inbalanced kernel and that made everything wonky. I noticed the one incorrect value and changed it.
  *       I decided to keep the snow normal maps from the bugged version because I like the wonky melty look compared to the "correct" rigid version.
  *   Version 9 (0 hr)
- *     Fri. 1:20 PM change names to "final" instead of "project"
+ *     Fri. 12/2/22 1:20 PM change names to "final" instead of "project"
+ *   Version 10
+ *     Sat. 12/3/22 8:30 AM - 10:14 AM = 1.75 hr attempt to make the front panel of the butt slat (I'm getting the textures wrong)
+ *     
  */

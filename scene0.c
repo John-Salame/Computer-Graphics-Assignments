@@ -94,7 +94,7 @@ void scene0(int dim, int light, float l0Position[4], float l1Position[4], int da
 
   // place a park bench
   glPushMatrix();
-  glTranslatef(-5, 0.0, -0.5);
+  glTranslatef(-5, 1.0, -0.5);
   bench(5, 2.5, 2, texture[3], normalMaps[3], normalShader); // or normalMixShader
   glPopMatrix();
   // place some candy canes

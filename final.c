@@ -354,7 +354,12 @@ void display() {
     glPopMatrix();
   } 
 
+
   // Display parameters
+  glDisable(GL_LIGHTING);
+  glDisable(GL_TEXTURE_2D);
+  glColor3f(1.0, 1.0, 1.0);
+  glUseProgram(0);
   glWindowPos2i(5,5);
   Print("Light: %d; Control light: %d; Pause: %d", light, controlLight, pause);
   glWindowPos2i(5, 25);
