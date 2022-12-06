@@ -151,5 +151,5 @@
  *   Version 10
  *     Sat. 12/3/22 8:30 AM - 10:14 AM = 1.75 hr attempt to make the front panel of the butt slat (I'm getting the textures wrong)
  *     Sat. 12/3/22 10:14 AM - 11:08 AM = 0.9 hr I got the front texture to look good, but I can't make extra grains of wood look good on the other side
- *     
+ *     Mon. 12/5/22 11:20 PM - Tues. 12/6/22 12:04 AM = 0.7 hr get bench slats working correctly (though the underside's cracks in the wood look weird and wrong unlike the top)
  */

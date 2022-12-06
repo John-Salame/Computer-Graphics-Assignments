@@ -120,17 +120,16 @@ void buttSlat(float thickness, float filletRad, float flatWidth, unsigned int pr
     ErrCheck("bench butt slat enable vertex attributes");
 
     // set most of the globals
-    const float incrementFraction = 0.125;
-    const float texScrunch = 1.0; // hos much to compress the texture (higher = more density of cracks / grain in wood)
+    const float incrementFraction = 0.125; // 1/8 since that roughly lines up with how we can split the model into sides, fillets, and flat top
     const float benchTop = thickness;
     const float flatStart = filletRad; // x value of flat part
     const float flatEnd = flatStart + flatWidth;
     const float width = 2*filletRad + flatWidth;
     float filletBottom = thickness - filletRad; // how high up the side quads should go
-    const float texSpan = texScrunch * (texS2 - texS1);
-    const float texIncrement = texSpan * incrementFraction; // sides = 1 texIncrement, fillets = 1 texIncrement, top = 4 texIncrement
+    const float texSpan = texS2 - texS1;
+    const float texIncrement = texSpan / 8.0; // sides = 1 texIncrement, fillets = 1 texIncrement, top = 4 texIncrement
     float texStart = texS1; // start of the current quad's texture
-    float texEnd = texStart + texIncrement;
+    float texEnd = texS2;
 
     // make the rectangular parts of the butt slat
     glBegin(GL_QUADS);
@@ -181,7 +180,7 @@ void buttSlat(float thickness, float filletRad, float flatWidth, unsigned int pr
     // front panel part 1 (lower part)
     texStart = 0.0;
     texEnd = 1.0;
-    float filletBottomTex = 1.0-2*incrementFraction;
+    float filletBottomTex = 6*incrementFraction; // 6 increments of 1/8 since that is the unit this model is made in
     glNormal3f(0.0, 0.0, 1.0);
     glVertexAttrib3f(tangentIndex, 0.0, 1.0, 0.0);
     glVertexAttrib1f(bitangentDirIndex, -1.0); // bitangent = tangent x normal
