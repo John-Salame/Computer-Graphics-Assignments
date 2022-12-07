@@ -42,6 +42,12 @@ Change the scene by holding CTRL and using the arrow keys. Press M to change pro
 * First-Person Perspective: Turn the camera with the arrow keys.
 * Overhead Orthogonal or Overhead Perspective: Spin the scene with the arrow keys.
 
+## Useful Sources
+Passing two textures to a shader (decal and normal map):
+https://stackoverflow.com/questions/25252512/how-can-i-pass-multiple-textures-to-a-single-shader  
+Basis for the grass textuer:
+Attribution: <a href="https://www.freepik.com/free-photo/green-grass-field-background_991898.htm#&position=0&from_view=author">Image by awesomecontent</a> on Freepik
+
 ## Time taken
 According to my README, I spent anywhere from 32 to 42 hours getting my normal maps to work. As for added objects, I have only added a bench so far, which took me 7.5 hours. In total, I have spent 40 to 50 hours on the project.
 

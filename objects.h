@@ -18,7 +18,7 @@ void CandyCane(float crossRad, float straightHeight, float hookRad, int hookDeg,
 void ball(double x,double y,double z,double r);
 void Vertex(double th,double ph);
 // bench.c
-void createFillet(float right, float radius, float side, float top, unsigned int programName, float texS1, float texS2);
+void createFillet(float right, float radius, float side, float top,  unsigned int programName, float texS1, float texS2, float frontTexS1, float frontTexS2);
 void buttSlat(float thickness, float filletRad, float flatWidth, unsigned int programName, float texS1, float texS2);
 void bench(float width, float height, float depth, unsigned int texName, unsigned int normalMapName, unsigned int programName);
 

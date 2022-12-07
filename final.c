@@ -330,16 +330,23 @@ void display() {
   }
   // display one of the simple scenes with a light rotating around an object
   else {
-    glDisable(GL_CULL_FACE);
     glPushMatrix(); // in case I choose to do any rotation or scaling in the scenes
     // raise or lower the light
     l0Position[1] += lZ;
+    // allow the light source balls to be drawn properly
+    GLboolean useCulling = glIsEnabled(GL_CULL_FACE);
     glDisable(GL_LIGHTING);
+    glDisable(GL_CULL_FACE);
+    glUseProgram(0); // allow lights source ball to be drawn without lighting
     if(light) {
       ball(l0Position[0], l0Position[1], l0Position[2], 0.5);
       glLightfv(GL_LIGHT0, GL_POSITION, l0Position);
       // finally enable lighting
       glEnable(GL_LIGHTING);
+    }
+    // reset face culling if necessary
+    if(useCulling) {
+      glEnable(GL_CULL_FACE);
     }
     // now choose object based on scene
     if (scene == 1) {
@@ -555,14 +562,14 @@ int main(int argc, char** argv) {
   glCullFace(GL_BACK);
   glFrontFace(GL_CCW);
   // Load textures
-  texture[0] = LoadTexBMP("snow.bmp");
-  texture[1] = LoadTexBMP("snow2.bmp");
+  texture[0] = LoadTexBMP("noTex.bmp");
+  texture[1] = LoadTexBMP("snow.bmp");
   texture[2] = LoadTexBMP("snow3.bmp");
   texture[3] = LoadTexBMP("candyCane.bmp");
   texture[4] = LoadTexBMP("grass.bmp"); //Attribution: <a href="https://www.freepik.com/free-photo/green-grass-field-background_991898.htm#&position=0&from_view=author">Image by awesomecontent</a> on Freepik
   // Load normal maps
-  normalMaps[0] = LoadTexBMP("snow_normal.bmp");
-  normalMaps[1] = LoadTexBMP("snow2_normal.bmp");
+  normalMaps[0] = LoadTexBMP("noNormal.bmp");
+  normalMaps[1] = LoadTexBMP("snow_normal.bmp");
   normalMaps[2] = LoadTexBMP("snow3_normal.bmp");
   normalMaps[3] = LoadTexBMP("candyCane_normal.bmp");
   // Create shader programs
