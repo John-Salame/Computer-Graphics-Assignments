@@ -3,11 +3,13 @@ John Salame
 CSCI 5229
 Due Tues, 12/6/22
 
+## Graduate Student
+
 ## GitHub Repository
 https://www.github.com/John-Salame/Computer-Graphics-Assignments/tree/project
 
-## Potential Additional Work
-I have worked for 40-50 hours in the span of a week. In the final week before the project is due, I could probably work 20-30 more hours at most. That would be enough for possibly one or two new objects and one or two new effects. I could probably create three new things at most. I'm thinking of either making a spotlight (which could be tricky since everything is per-pixel lighting) that is on a lamp. I am also thinking of making fog and possibly a blizzard using a white rectangle in front of the face with most of the pixels discarded and maybe some random variation in intensity.
+## Blizzard
+I did not have time to figure out fog using transparency + shaders. However, I did create a blizzard overlay. Press B to toggle the blizzard. The snow is more frenzied during they day than during the night.
 
 ## Normal Map Generator
 I created a tool, createNormalMap.py, which creates OK to decent normal maps based on the textures I've created. So far it only creates variations in the tangent part of the normal vector (red). The bitangent (green) is always 128 (which means there is 0 bitangent component to the generated normal vector). I could extend my Python script to create the variations in the bitangent, but that would be a lot of headache adapting my red script to work for the y dimension and the green color.
@@ -33,6 +35,7 @@ Change the scene by holding CTRL and using the arrow keys. Press M to change pro
 * Press P to pause the light's motion and look around with the arrow keys (UP/DOWN/LEFT/RIGHT). Please note that "Pause" and "Control Light" are mutually exclusive; enabling one will disable the other.
 * Press C or 'o' to enter "Control Light" mode. In this mode, the light will pause and you can move the light with the arrow keys (UP/DOWN/LEFT/RIGHT).
 * Press CTRL + Arrow Keys to change the scene.
+* Press B to toggle the blizzard.
 * Press L to enable or disable lighting. (does not work for objects with shaders)
 * Press T to toggle textures. (does not work for objects with shaders)
 * Press X to toggle axes.
@@ -46,9 +49,11 @@ Change the scene by holding CTRL and using the arrow keys. Press M to change pro
 Passing two textures to a shader (decal and normal map):
 https://stackoverflow.com/questions/25252512/how-can-i-pass-multiple-textures-to-a-single-shader  
 Basis for the grass textuer:
-Attribution: <a href="https://www.freepik.com/free-photo/green-grass-field-background_991898.htm#&position=0&from_view=author">Image by awesomecontent</a> on Freepik
+Attribution: <a href="https://www.freepik.com/free-photo/green-grass-field-background_991898.htm#&position=0&from_view=author">Image by awesomecontent</a> on Freepik  
+Random number generation in shaders:
+https://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
 
 ## Time taken
-According to my README, I spent anywhere from 32 to 42 hours getting my normal maps to work. As for added objects, I have only added a bench so far, which took me 7.5 hours. In total, I have spent 40 to 50 hours on the project.
+According to my README, I spent anywhere from 32 to 42 hours getting my normal maps to work. At the time of the review, I had spent 40 to 50 hours on the project, with a partial bench making up the work after the normal maps were completed.
 
-The bench is awful since I only focused on the wooden seat in those 7.5 hours. I want to improve the look of the bench and make a fancier design. I spend too much time testing and trying to get the look right. The wooden look was somewhat difficult to get right.
+At the time of the final turn-in, I have about 56 to 66 hours total, having worked 15.65 hours since the review assignment.

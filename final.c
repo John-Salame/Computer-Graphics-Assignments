@@ -11,7 +11,7 @@
 
 // Macros
 #define NUM_TEX 6 // number of textures
-#define NUM_PROGS 4 // number of shader programs
+#define NUM_PROGS 5 // number of shader programs
 #define NUM_NORMAL_MAPS 4
 
 // Forward declarations
@@ -26,7 +26,8 @@ int ph; // angle around x-axis
 double dim; // width and height of the orthographic projection
 int mode; // begin in first-person projection
 int fov;
-double asp; // aspect ratio, used to keep the proportions of an object constant when resizing the windowa
+double asp = 1.0; // aspect ratio, used to keep the proportions of an object constant when resizing the window
+double t; // record the current time
 // first-person variables
 int fpTh; // first-person theta
 int fpPh; // first-person phi
@@ -54,6 +55,7 @@ unsigned int texture[NUM_TEX];  //  Texture names
 unsigned int normalMaps[NUM_NORMAL_MAPS];
 // shaders
 unsigned int shaders[NUM_PROGS]; // this holds the shader programs
+int blizzard = 0; // if value is 1, activate the blizzard screen overlay
 
 
 // BEGIN UTILITY FUNCTIONS
@@ -78,6 +80,7 @@ void initScene0() {
   eye[0]=-10.0; eye[1]=2.0; eye[2]=14.0;
   updateFpVecs(); // recalculate forward and up using fpTh and fpPh
   day = 1;
+  blizzard = 1;
 }
 
 // depends on "scene" global variable
@@ -100,6 +103,7 @@ void init() {
   lTh = 0;
   lZ = 0;
   useTexture = 1;
+  blizzard = 0;
   switch(scene) {
     case 0:
       initScene0();
@@ -207,7 +211,10 @@ void display() {
   }
   // choose the background color
   if (scene == 0 && day) {
-    glClearColor(0.2, 0.4, 1.0, 1.0); // blue sky
+    if (blizzard)
+      glClearColor(0.6, 0.6, 0.8, 1.0);
+    else
+      glClearColor(0.2, 0.4, 1.0, 1.0); // blue sky
   }
   else {
     glClearColor(0, 0, 0, 1); // black background by default
@@ -359,10 +366,52 @@ void display() {
       bench(0.8*dim, 0.6*dim, 0.4*dim, texture[3], normalMaps[3], shaders[3]); // use "normal map mix" shader
     }
     glPopMatrix();
-  } 
+  }
 
+  // Activate the blizzard overlay
+  if(blizzard) {
+    unsigned int blizzardProgram = shaders[4];
+    glUseProgram(blizzardProgram);
+    unsigned int timeLoc = glGetUniformLocation(blizzardProgram, "t");
+    glUniform1f(timeLoc, (float) t); // pass in the time to use as a seed
+    unsigned int chanceLoc = glGetUniformLocation(blizzardProgram, "pixChance");
+    // Choose color of snow on overlay (white during the day, gray at night)
+    if(scene == 0 && !day) {
+      glColor3f(0.6, 0.6, 0.6);
+      glUniform1f(chanceLoc, 0.003); // less snow at night
+    }
+    else {
+      glColor3f(1.0, 1.0, 1.0);
+      glUniform1f(chanceLoc, 0.01);
+    }
+    // Code for positioning and displaying the overlay taken from Example 21
+    // Save transform attributes (Matrix Mode and Enabled Modes)
+    glPushAttrib(GL_TRANSFORM_BIT|GL_ENABLE_BIT);
+    // Save projection matrix and set unit transform
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(-asp,+asp,-1,1,-1,1);
+    // Save model view matrix and set to indentity
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    // Draw the blizzard
+    glBegin(GL_QUADS);
+    glVertex2f(-asp, 1.0);
+    glVertex2f(-asp, -1.0);
+    glVertex2f(asp, -1.0);
+    glVertex2f(asp, 1.0);
+    glEnd();
+    glPopMatrix();
+    //  Reset projection matrix
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    //  Pop transform attributes (Matrix Mode and Enabled Modes)
+    glPopAttrib();
+  }
 
-  // Display parameters
+  // Display some parameters in text at bottom left of screen
   glDisable(GL_LIGHTING);
   glDisable(GL_TEXTURE_2D);
   glColor3f(1.0, 1.0, 1.0);
@@ -459,27 +508,21 @@ void key(unsigned char ch,int x,int y) {
   // L: toggle the light
   else if (ch == 'l' || ch == 'L')
     light = !light;
+  // T: toggle textures (only works in standard pipeline)
   else if (ch == 't' || ch == 'T')
     useTexture = !useTexture;
+  // B: toggle blizzard overlay
+  else if (ch == 'b' || ch == 'B')
+    blizzard = !blizzard;
   // C or O: control the light (stop the light from moving and allow you to move the light using arrow keys)
   else if (ch == 'c' || ch == 'C' || ch == 'o' || ch == 'O') {
     controlLight = !controlLight;
     pause = 0; // "Control Light" and "pause" turn each other off
-    if (controlLight) {
-      glutIdleFunc(NULL);
-    }
-    else
-      glutIdleFunc(idle);
   }
   // P: pause the movement of the light but still allow the user to rotate the screen
   else if (ch == 'p' || ch == 'P') {
     pause = !pause;
     controlLight = 0; // "Control Light" and "pause" turn each other off
-    if (pause)
-      glutIdleFunc(NULL);
-    else {
-      glutIdleFunc(idle);
-    }
   } // end of pause logic
 
   // Only allow planar movement in mode 2 (first-person)
@@ -520,12 +563,15 @@ void key(unsigned char ch,int x,int y) {
 void idle()
 {
    //  Elapsed time in seconds
-   double t = glutGet(GLUT_ELAPSED_TIME)/1000.0;
-   // slow down the light's rotation on scene 0 (day and night cycle)
-   if (scene == 0)
-     lTh = fmod(30*t,360.0);
-   else
-     lTh = fmod(90*t,360.0);
+   t = glutGet(GLUT_ELAPSED_TIME)/1000.0;
+   // move light if not in "control light" or "pause" mode
+   if(!controlLight && !pause) {
+    if (scene == 0)
+      // slow down the light's rotation on scene 0 (day and night cycle)
+      lTh = fmod(30*t,360.0);
+    else
+      lTh = fmod(90*t,360.0);
+   }
    //  Tell GLUT it is necessary to redisplay the scene
    glutPostRedisplay();
 }
@@ -578,6 +624,7 @@ int main(int argc, char** argv) {
   shaders[1] = CreateShaderProg("pixtex.vert", "pixtex.frag"); // per-pixel lighting
   shaders[2] = CreateShaderProg("normalMap.vert", "normalMap.frag");
   shaders[3] = CreateShaderProg("normalMap.vert", "normalMapMix.frag");
+  shaders[4] = CreateShaderProg("simple.vert", "blizzardOverlay.frag");
   // Finally, allow the window to draw
   ErrCheck("init");
   glutMainLoop();

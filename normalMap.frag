@@ -1,3 +1,4 @@
+//  Author: John Salame
 //  Per Pixel Lighting shader with texture and normal map
 //  Modified from Per-Pixel Lighting
 #version 120

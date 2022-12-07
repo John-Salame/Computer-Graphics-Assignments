@@ -1,4 +1,5 @@
 //  Per Pixel Lighting shader with texture
+//  Author: John Salame
 //  Modified from Example 25
 #version 120
 

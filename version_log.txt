@@ -142,7 +142,7 @@
  *       The bench is still incomplete and the only part I focused on was the seat. Everything else is awful.
  *   Version 7.5 (0.4 hours)
  *     Wed. 11/30/22 4:30 AM - 4:51 AM = 0.4 hours updating README
- *   Version 8 (0.7 hours)
+ *   Version 8 (0.7 hours) (Final version for review assignment)
  *     Wed. 11/30/22 4:51 AM - 5:33 AM = 0.7 hr fix but in normal map generator (Python)
  *       I had an inbalanced kernel and that made everything wonky. I noticed the one incorrect value and changed it.
  *       I decided to keep the snow normal maps from the bugged version because I like the wonky melty look compared to the "correct" rigid version.
@@ -160,6 +160,9 @@
  *       Fix the rendering of the fillet front face
  *     Tues. 12/6/22 10:15 PM - Wed. 12/7/22 1:30 AM = 3.25 hr back rest and "metal rod" connecters
  *       I used candy canes in place of metal rods for testing, but I think I will continue to use candy canes instead of switching to metal.
- *   Version 12
- *     Ver. 12.1 Wed. 12/7/22 1:30 AM - 3:18 AM = 1.8 hr bench legs completed
+ *   Version 12 (1.8 hr)
+ *     Wed. 12/7/22 1:30 AM - 3:18 AM = 1.8 hr bench legs completed
+ *   Version 13 (2 hr) (Final version!)
+ *     Wed 12/7/22 3:18 AM - 5:18 AM = 2 hr Blizzard overlay
+ *       I also attempted to make the bench fancier by adding more to the sides, but I didn't get the math right and I scrapped it.
  */

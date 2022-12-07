@@ -274,14 +274,13 @@ void bench(float width, float height, float depth, unsigned int texName, unsigne
     const float woodColor[] = {0.6, 0.4, 0.3, 1.0};
     const float thickness = 0.05; // material thickness, on proportion to total bench height
     const float seatBottom = 0.4;
-    const float seatTop = seatBottom + thickness;
     // the space variable needs to be calculated for an exact fit.
     // butt slats (for lack of a better term) have this ratio: ? space, 0.1 fillet, 0.2 flat, 0.1 fillet, ? space
     const int numButtSlats = 20;
     const float filletRad = 0.01;
     const float flatWidth = 0.02;
     const float buttSlatWidth = 2*filletRad + flatWidth;
-    // variables for metal bars
+    // variables for metal rods (or candy canes if I'm using those)
     const float metalDx = 0.5 * thickness; // how far the center of the metal rod is from the wood
     const float metalRad = 1.414 * metalDx; // sqrt(2)*metalDx; result: wood contacts metal rod at 45 degree mark
     // variables for back rest

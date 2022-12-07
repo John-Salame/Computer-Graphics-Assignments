@@ -1,3 +1,4 @@
+//  Author: John Salame
 //  Per Pixel Lighting shader with texture and normal map
 //  Modified from Per-Pixel Lighting
 //  This is the same as normalMap.frag but with a baseline intensity of gl_Color with the texture+lighting added on top
