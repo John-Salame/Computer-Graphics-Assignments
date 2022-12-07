@@ -10,7 +10,7 @@
 #include "scenes.h" // also includes individual objects we can draw
 
 // Macros
-#define NUM_TEX 5 // number of textures
+#define NUM_TEX 6 // number of textures
 #define NUM_PROGS 4 // number of shader programs
 #define NUM_NORMAL_MAPS 4
 
@@ -567,6 +567,7 @@ int main(int argc, char** argv) {
   texture[2] = LoadTexBMP("snow3.bmp");
   texture[3] = LoadTexBMP("candyCane.bmp");
   texture[4] = LoadTexBMP("grass.bmp"); //Attribution: <a href="https://www.freepik.com/free-photo/green-grass-field-background_991898.htm#&position=0&from_view=author">Image by awesomecontent</a> on Freepik
+  texture[5] = LoadTexBMP("pi.bmp");
   // Load normal maps
   normalMaps[0] = LoadTexBMP("noNormal.bmp");
   normalMaps[1] = LoadTexBMP("snow_normal.bmp");

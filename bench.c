@@ -242,16 +242,15 @@ void buttSlat(float thickness, float filletRad, float flatWidth, unsigned int pr
  * texName and normalMapName correspond to the wood texture used in the seat and back rest.
  */
 void bench(float width, float height, float depth, unsigned int texName, unsigned int normalMapName, unsigned int programName) {
+    glUseProgram(programName);
     // save the matrix and scale the entire bench
     glPushMatrix();
     glScalef(width, height, depth);
     
-    // disable face culling when drawing the bench
+    // record whether face culling is enabled, since some parts of the bench disable culling
     GLboolean useCulling = glIsEnabled(GL_CULL_FACE);
-    // glDisable(GL_CULL_FACE);
     
     // prepare textures
-    glUseProgram(programName);
     unsigned int texLoc = glGetUniformLocation(programName, "tex");
     unsigned int normalLoc = glGetUniformLocation(programName, "normalMap");
     // bind the uniform samplers to texture units (0 for decal, 1 for normal map)
@@ -289,6 +288,15 @@ void bench(float width, float height, float depth, unsigned int texName, unsigne
     const float backRestAngle = 75.0;
     const float backRestLength = 1.0 - seatBottom - metalDx - metalRad*Sin(135-backRestAngle);
 
+    // variables for bench legs
+    float legAngle = 90 + 2*(90-backRestAngle); // less steep than back rest angle; start with angle for back legs
+    const float legLength = (seatBottom + metalDx + metalDx*Sin(-45-legAngle)) / Sin(legAngle);
+    // calculation for leg length, using legAngle as the angle down from the x-z plane (for back legs first)
+    // the legs are smaller radius than the connectors and same diameter as the thickness of the "butt slat" seat planks
+    // the length of the legs needs to be such that the highest part of the leg touches the ground
+    // legLength*Sin(legAngle) = seatBottom + metalDx + metalDx*Sin(-45-legAngle)
+    // legLength = (seatBottom + metalDx + metalDx*Sin(-45-legAngle)) / Sin(legAngle)
+
     // set color and material properties for wooden butt slats
     glColor4fv(woodColor);
     glMaterialfv(GL_FRONT, GL_AMBIENT, woodColor);
@@ -325,24 +333,71 @@ void bench(float width, float height, float depth, unsigned int texName, unsigne
         glPopMatrix();
         buttSlatStart += slatOffset;
     }
+    ErrCheck("Bench butt slats and back rest");
 
-    // Draw the metal rods
+    // Draw the metal rods (or candy cane rods) - connector and top of back rest
     // disable face culling since we can see in side the rods
     glDisable(GL_CULL_FACE);
     glPushMatrix();
     glTranslatef(-0.5, seatBottom + metalDx, -0.5-metalDx); // position the metal rod where it belongs
-    // TO-DO: draw the metal rod
+    glPushMatrix();
+    // connector rod
+    glRotatef(90, 0.0, 1.0, 0.0);
+    RedStripedCylinderWall(30, metalRad, 1.0, programName);
+    glPopMatrix();
+    ErrCheck("Bench connector");
+    // top metal rod
+    glPushMatrix();
+    glRotatef(backRestAngle, 1.0, 0.0, 0.0); // rotate around the metal pole connecting the seat to the back rest
+    glTranslatef(0.0, 0.0, -backRestLength - 2*metalDx); // position the second metal rod (at the top of the back rest)
+    glRotatef(90, 0.0, 1.0, 0.0);
+    RedStripedCylinderWall(30, metalRad, 1.0, programName);
+    glPopMatrix();
+    ErrCheck("Bench upper rod");
+    // draw back legs
+    glPushMatrix();
+    glRotatef(legAngle, 1.0, 0.0, 0.0);
+    glScalef(1.0, 1.0, legLength);
+    // left front leg
+    glPushMatrix();
+    glTranslatef(metalDx, 0.0, 0.0);
+    RedStripedCylinderWall(30, metalDx, 1.0, programName);
+    glPopMatrix();
+    // right front leg
+    glPushMatrix();
+    glTranslatef(1.0 - metalDx, 0.0, 0.0);
+    RedStripedCylinderWall(30, metalDx, 1.0, programName);
+    glPopMatrix();
+    glPopMatrix();
+    ErrCheck("Bench back legs");
+    glPopMatrix();
+    ErrCheck("Bench connectors and back legs");
+
+    // draw front legs and connector for this push/pop segment
+    // Note: leg angle should be less than 90 degrees down from z-axis now; calculate the correct angle
+    legAngle = 180 - legAngle;
+    glPushMatrix();
+    glTranslatef(-0.5, seatBottom, 0.5+metalDx); // y and z of front connector
+    // draw front connector (where front legs come from)
     glPushMatrix();
     glRotatef(90, 0.0, 1.0, 0.0);
     RedStripedCylinderWall(30, metalRad, 1.0, programName);
     glPopMatrix();
-    glRotatef(backRestAngle, 1.0, 0.0, 0.0); // rotate around the metal pole connecting the seat to the back rest
-    // position the second metal rod (at the top of the back rest)
-    glTranslatef(0.0, 0.0, -backRestLength - metalDx - metalDx*backRestLength); // position the metal rod at a radius past the back rest before rotating
-    glScalef(1.0, 1.0, backRestLength);
-    glRotatef(90, 0.0, 1.0, 0.0);
-    RedStripedCylinderWall(30, metalRad, 1.0, programName);
+    // draw front legs
+    glRotatef(legAngle, 1.0, 0.0, 0.0);
+    glScalef(1.0, 1.0, legLength);
+    // left front leg
+    glPushMatrix();
+    glTranslatef(metalDx, 0.0, 0.0);
+    RedStripedCylinderWall(30, metalDx, 1.0, programName);
     glPopMatrix();
+    // right front leg
+    glPushMatrix();
+    glTranslatef(1.0 - metalDx, 0.0, 0.0);
+    RedStripedCylinderWall(30, metalDx, 1.0, programName);
+    glPopMatrix();
+    glPopMatrix();
+    ErrCheck("Bench front legs");
     
     // reset face culling setting
     if(useCulling) {
