@@ -11,7 +11,7 @@
  */
 void ball(double x,double y,double z,double r)
 {
-  int inc = 30;
+  int inc = 15;
   // Save transformation
   glPushMatrix();
   // Offset, scale and rotate

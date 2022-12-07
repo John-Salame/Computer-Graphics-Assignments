@@ -1,7 +1,7 @@
-# HW6
-EXE=hw6
+# final project
+EXE=final
 SCENE_DEPS=myCSCI5229.h objects.h scenes.h
-OBJECTS=candyCane.o snow.o ball.o
+OBJECTS=candyCane.o snow.o ball.o bench.o
 
 # Main target
 all: $(EXE)
@@ -27,24 +27,26 @@ CLEAN=rm -f $(EXE) *.o *.a
 endif
 
 # Main file dependencies
-hw6.o: hw6.c $(SCENE_DEPS)
+final.o: final.c $(SCENE_DEPS)
 
 # myCSCI5229.a dependencies
 fatal.o: fatal.c myCSCI5229.h
 errcheck.o: errcheck.c myCSCI5229.h
 print.o: print.c myCSCI5229.h
 loadtexbmp.o: loadtexbmp.c myCSCI5229.h
+loadProgram.o: loadProgram.c myCSCI5229.h
 
 # objects.a dependencies
 candyCane.o: candyCane.c objects.h myCSCI5229.h
 snow.o: snow.c objects.h myCSCI5229.h
 ball.0: ball.c objects.h myCSCI5229.h
+bench.o: bench.c objects.h myCSCI5229.h
 
 # scenes.a dependencies
 scene0.o: scene0.c objects.h myCSCI5229.h
 
 #  Create archives
-myCSCI5229.a:fatal.o errcheck.o print.o loadtexbmp.o
+myCSCI5229.a:fatal.o errcheck.o print.o loadtexbmp.o loadProgram.o
 	ar -rcs $@ $^	
 
 # Compile rules
@@ -54,7 +56,7 @@ myCSCI5229.a:fatal.o errcheck.o print.o loadtexbmp.o
 	g++ -c $(CFLG)  $<
 
 #  Link
-hw6:hw6.o scene0.o $(OBJECTS) myCSCI5229.a 
+final:final.o scene0.o $(OBJECTS) myCSCI5229.a 
 	gcc $(CFLG) -o $@ $^  $(LIBS)
 
 #  Clean

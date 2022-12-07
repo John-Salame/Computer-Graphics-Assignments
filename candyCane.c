@@ -5,19 +5,29 @@
 #include "objects.h"
 
 /* Draw a circle with intervals of circlePrecision degrees and radius r at origin (ox, oy, oz) */
-void Circle(float circlePrecision, float r, float ox, float oy, float oz) {
+void Circle(float circlePrecision, float r, float ox, float oy, float oz, unsigned int programName) {
   float white[] = {1, 1, 1, 1};
   float zero[] = {0, 0, 0, 1.0}; // resets the material colors
   glColor4fv(white);
   glMaterialfv(GL_FRONT, GL_AMBIENT, white);
   glMaterialfv(GL_FRONT, GL_DIFFUSE, white);
   glMaterialfv(GL_FRONT, GL_SPECULAR, zero);
-  glNormal3f(0, 0, -1); // normal is just the front plane's normal, which is z for this circle
+  // enable the vertex attributes for the vertex shader
+  unsigned int tangentIndex = glGetAttribLocation(programName, "InTangent");
+  unsigned int bitangentDirIndex = glGetAttribLocation(programName, "BitangentDir");
+  glEnableVertexAttribArray(tangentIndex);
+  glEnableVertexAttribArray(bitangentDirIndex);
+  glVertexAttrib1f(bitangentDirIndex, 1.0); // bitangent = normal x tangent
+  ErrCheck("candy cane circle setup");
+  // set the normal and begin drawing
+  glNormal3f(0, 0, 1); // normal is just the front plane's normal, which is z for this circle
+  // because of this strange texture arrangement, -x is the bitangent and y is the tangent
+  glVertexAttrib3f(tangentIndex, 0.0, 1.0, 0.0);
   glBegin(GL_TRIANGLE_FAN);
   glTexCoord2f(0.5, 0.5);
   glVertex3f(ox, oy, oz); // center of triangle fan
   for(int i=0; i<=360; i+=circlePrecision) {
-    glTexCoord2f(0.5*(1+Sin(i)), 0.5*(1-Cos(i)));
+    glTexCoord2f(0.5*(1+Sin(i)), 0.5*(1-Cos(i))); // textures start at bottom and go counter-clockwise with each vertex
     glVertex3f(ox+r*Cos(i), oy+r*Sin(i), oz);
   }
   glEnd();
@@ -25,9 +35,16 @@ void Circle(float circlePrecision, float r, float ox, float oy, float oz) {
 }
 
 /* Helper function for candy cane, makes a cylinder wall with radius crossRad and height straightHeight */
-void RedStripedCylinderWall(int circlePrecision, float crossRad, float straightHeight) {
+void RedStripedCylinderWall(int circlePrecision, float crossRad, float straightHeight, unsigned int programName) {
   glPushMatrix();
   glScalef(crossRad, crossRad, straightHeight);
+  // enable the vertex shader attributes for the normal map shader
+  unsigned int tangentIndex = glGetAttribLocation(programName, "InTangent");
+  unsigned int bitangentDirIndex = glGetAttribLocation(programName, "BitangentDir");
+  glEnableVertexAttribArray(tangentIndex);
+  glEnableVertexAttribArray(bitangentDirIndex);
+  glVertexAttrib1f(bitangentDirIndex, 1.0); // bitangent = normal x tangent
+  ErrCheck("candy cane red striped cylinder wall setup");
   float quadHeight = 0.2; // split the cylinder length-wise into multiple quads so lighting works close-up
   float nonRed = 1.0; // 1.0 when white stripe, 0.0 when red stripe
   float myColor[4];
@@ -44,8 +61,12 @@ void RedStripedCylinderWall(int circlePrecision, float crossRad, float straightH
       glMaterialfv(GL_FRONT, GL_AMBIENT, myColor);
       glMaterialfv(GL_FRONT, GL_DIFFUSE, myColor);
       glNormal3f(Cos(i), Sin(i), 0); // here, the normal vector is along the radius; normal is same for both vertices
-      glVertex3f(Cos(i), Sin(i), j);
+      glVertexAttrib3f(tangentIndex, -Sin(i), Cos(i), 0.0); // the tangent for normal map (faces toward s in (s,t))
+      float s = i/360.0;
+      glTexCoord2f(s, j+quadHeight);
       glVertex3f(Cos(i), Sin(i), j+quadHeight);
+      glTexCoord2f(s, j);
+      glVertex3f(Cos(i), Sin(i), j);
     }
     glEnd();
   }
@@ -79,9 +100,8 @@ void RedStripedHookSegment(int circlePrecision, float crossRad, float hookRad) {
     // start creating the shape
     float x = crossRad*Cos(i);
     float radius = hookRad-x;
-    // The x value of the vertex is x-hookRad, which is the same as -1*radius
-    glNormal3f(Cos(i), Sin(i), 0); // here, the normal vector is along the radius
-    glVertex3f(-radius, crossRad*Sin(i), 0);
+    // The ordering of the points is counter-clockwise. That means we draw the more complicated point first.
+    
     // Here we explain what is shown in my proof, hookProof.JPG
     // The "top" of the "cylinder" is found by following the secant line from the current hook segment to the start of the next hook segment.
     // The equation to do this is 2*hookRad*sin(hookDeg/2) and the direction of the secant line is the tangent line rotated by (hookDeg/2).
@@ -92,8 +112,12 @@ void RedStripedHookSegment(int circlePrecision, float crossRad, float hookRad) {
     float secantLength = 2*radius*Sin(secantAngle);
     // rotate the normal vector by hookDeg along the y-axis
     //   x=x_old*cos(rot_angle), y=y_old, z=x_old*sin(rot_angle)
+    // The x value x-old is x-hookRad, which is the same as -1*radius
     glNormal3f(Cos(i)*Cos(hookDeg), Sin(i), -Cos(i)*Sin(hookDeg)); 
     glVertex3f(-radius+secantLength*Sin(secantAngle), crossRad*Sin(i), secantLength*Cos(secantAngle));
+
+    glNormal3f(Cos(i), Sin(i), 0); // here, the normal vector is along the radius
+    glVertex3f(-radius, crossRad*Sin(i), 0);
   }
   glEnd();
   glPopMatrix();
@@ -107,19 +131,42 @@ void RedStripedHookSegment(int circlePrecision, float crossRad, float hookRad) {
  * @param float hookDeg - the length of the hook's sweep path in degrees (180 would make a half-circle)
  * @param unsigned int texName - name of the texture to use on the ends of the candy cane; I don't have texture on the main part because it looks terrible with the glossy look of the candy cane.
  */
-void CandyCane(float crossRad, float straightHeight, float hookRad, int hookDeg, unsigned int texName) {
+void CandyCane(float crossRad, float straightHeight, float hookRad, int hookDeg, 
+    unsigned int texName, unsigned int normalMapName, unsigned int programName) {
+  // transforms related to the whole candy cane
   glPushMatrix();
   glRotatef(-90, 1.0, 0, 0); // make it so y is up for the candy cane instead of z. I have this because I initially thought z was pointing up.
+  
+  // use the shader program we passed in
+  glUseProgram(programName);
   // prepare texture
+  unsigned int texLoc = glGetUniformLocation(programName, "tex");
+  unsigned int normalLoc = glGetUniformLocation(programName, "normalMap");
+  // bind the uniform samplers to texture units (0 for decal, 1 for normal map)
+  ErrCheck("candy cane getting uniforms");
+  glUniform1i(texLoc, 0);
+  glUniform1i(normalLoc, 1);
+  ErrCheck("candy cane setting uniforms");
+  // provide the texture units for decal and normal map
+  glActiveTexture(GL_TEXTURE0 + 1);
+  glBindTexture(GL_TEXTURE_2D, normalMapName);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glActiveTexture(GL_TEXTURE0 + 0);
   glBindTexture(GL_TEXTURE_2D, texName);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  ErrCheck("candy cane setting textures");
   int i = 0; // for the loop
   int circlePrecision = 15; // degrees per rectangle making up a cylinder
   // First, make a circle at the base of the candy cane
-  Circle(circlePrecision, crossRad, 0, 0, 0);
+  // make sure the bottom of the circle is down
+  glPushMatrix();
+  glRotatef(180, 1.0, 0, 0);
+  Circle(circlePrecision, crossRad, 0, 0, 0, programName);
+  glPopMatrix();
   // Now, make the tall straight cylinder
-  RedStripedCylinderWall(circlePrecision, crossRad, straightHeight);
+  RedStripedCylinderWall(circlePrecision, crossRad, straightHeight, programName);
   // Now, make the hook
   glTranslatef(hookRad, 0, straightHeight);
   for(i=0; i<hookDeg; i+=circlePrecision) {
@@ -127,10 +174,9 @@ void CandyCane(float crossRad, float straightHeight, float hookRad, int hookDeg,
     glRotatef(circlePrecision, 0, 1.0, 0);
     //glRotatef(circlePrecision, 0, 1.0, 0); // rotate the curve origin so the next segment starts at the end of the previous segment
   }
-  // make sure the bottom of the circle is down
-  glRotatef(180, 1.0, 0, 0);
-  Circle(circlePrecision, crossRad, -hookRad, 0, 0);
+  Circle(circlePrecision, crossRad, -hookRad, 0, 0, programName);
   glPopMatrix();
+  glUseProgram(0); // reset to fixed pipeline, so it will be the default program
   ErrCheck("candy cane");
 }
 

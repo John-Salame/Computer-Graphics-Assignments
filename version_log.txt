@@ -103,3 +103,66 @@
  *   Version 2 Tues, 9:30 AM - 10:30 AM = 1 hr
  *     Add grass texture and resubmit
  */
+
+/*
+ * John Salame
+ * CSCI 5229 Computer Graphics
+ * Final Project
+ * Due Tues, 12/6/22
+ * Revisions and work log:
+ *   Reading and preparation: 10 - 20 hours
+ *   Version 0 (1 hr)
+ *     Wed. 11/23/22 8:00 PM - 9:00 PM (1 hr)
+ *     Fix the names of things to say Final Project
+ *     Begin making the normal map creator in Python
+ *   Version 1 (4 hr)
+ *     Wed. 11/23/22 9:00 PM - Thurs 11/24/22 1:00 AM (4 hr)
+ *     I created a script to produce a normal map for an image.
+ *     So far, it only creates the X component of the normal map.
+ *     The Y component is 128, and the Z component is 255.
+ *   Version 2 (5.75 hr)
+ *     Thurs. 11/24/22 11:00 AM - 12:30 PM = 1.5 hr Study Example 25
+ *     Thurs. 11/24/22 1:30 PM - 3:15 PM = 1.75 hr Fix Winding
+ *       Still unsure if the winding on the ball is correct. I might just disable culling when I draw it.
+ *     Fri. 11/25/22 7:40 AM - 9:40 AM = 2 hr attempt to mimic standard pipeline with two LightPos
+ *     Fri. 11/25/22 11:00 AM - 11:30 AM = 0.5 hr - Shader imitating standard pipeline works!
+ *   Version 3 (1 hr)
+ *     Fri. 11/25/22 12:00 PM - 1:00 PM = 1 hr Per-Pixel Lighting With Multiple Lights
+ *   Version 4 (3.5 hr)
+ *     Fri. 11/25/22 3:50 PM - 7:20 PM = 3.5 hr get normal maps working on flat surfaces (looks more like bumps than cuts though)
+ *   Version 5 (3.5 hr)
+ *     Fri. 11/25/22 8:45 PM - Sat. 12/26/22 12:15 AM = 3.5 hr Read and prepare for vertex attribute
+ *   Version 6 (3.2 hr)
+ *     Mon. 11/28/22 3:00 PM - 3:30 PM = 0.5 hr Some debugging of normal map on curved surface
+ *     Mon. 11/28/22 7:00 PM - 7:42 PM = 0.7 hr troubleshooting and fixing normal map on snow pile (I had forgotten to set the program like an idiot!)
+ *     Mon. 11/28/22 7:42 PM - 9:42 PM = 2 hr get normal map on part of candy cane (not worth it, the effect is much too subtle)
+ *   Version 7 (7.5 hours)
+ *     Tues. 11/29/22 9:00 PM - Wed. 11/30/22 4:30 AM = 7.5 hr get wooden bench working
+ *       Geometry, textures, normal maps; 256 lines of code in 7.5 hours
+ *       The bench is still incomplete and the only part I focused on was the seat. Everything else is awful.
+ *   Version 7.5 (0.4 hours)
+ *     Wed. 11/30/22 4:30 AM - 4:51 AM = 0.4 hours updating README
+ *   Version 8 (0.7 hours) (Final version for review assignment)
+ *     Wed. 11/30/22 4:51 AM - 5:33 AM = 0.7 hr fix but in normal map generator (Python)
+ *       I had an inbalanced kernel and that made everything wonky. I noticed the one incorrect value and changed it.
+ *       I decided to keep the snow normal maps from the bugged version because I like the wonky melty look compared to the "correct" rigid version.
+ *   Version 9 (0 hr)
+ *     Fri. 12/2/22 1:20 PM change names to "final" instead of "project"
+ *   Version 10 (3.35 hr)
+ *     Sat. 12/3/22 8:30 AM - 10:14 AM = 1.75 hr attempt to make the front panel of the butt slat (I'm getting the textures wrong)
+ *     Sat. 12/3/22 10:14 AM - 11:08 AM = 0.9 hr I got the front texture to look good, but I can't make extra grains of wood look good on the other side
+ *     Mon. 12/5/22 11:20 PM - Tues. 12/6/22 12:04 AM = 0.7 hr get bench slats working correctly (though the underside's cracks in the wood look weird and wrong unlike the top)
+ *   Version 11 (8.5 hr)
+ *     Tues. 12/6/22 3:00 PM - 6:00 PM = 3 hr plan for bench back and try to fix normal map on left fillet
+ *     Tues. 12/6/22 8:00 PM - 10:15 PM = 2.25 hr 
+ *       Potentially fix base plate error (it was pulling a uniform variable index from the wrong shader)
+ *       Fix the left fillet rendering (but lose the most prominent non-white scratches/splits visually in the process)
+ *       Fix the rendering of the fillet front face
+ *     Tues. 12/6/22 10:15 PM - Wed. 12/7/22 1:30 AM = 3.25 hr back rest and "metal rod" connecters
+ *       I used candy canes in place of metal rods for testing, but I think I will continue to use candy canes instead of switching to metal.
+ *   Version 12 (1.8 hr)
+ *     Wed. 12/7/22 1:30 AM - 3:18 AM = 1.8 hr bench legs completed
+ *   Version 13 (2 hr) (Final version!)
+ *     Wed 12/7/22 3:18 AM - 5:18 AM = 2 hr Blizzard overlay
+ *       I also attempted to make the bench fancier by adding more to the sides, but I didn't get the math right and I scrapped it.
+ */
